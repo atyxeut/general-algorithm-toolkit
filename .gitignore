@@ -2,8 +2,12 @@
 
 !.gitignore
 !LICENSE
-!NOTICE
 !README.md
+
+!ruff.toml
+!.clangd
+!.clang-format
+!fmt_cpp.py
 
 !xmake.lua
 !init.py

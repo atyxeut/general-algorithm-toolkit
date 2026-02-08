@@ -1,0 +1,16 @@
+CompileFlags:
+  Add:
+    [
+      -std=c++26,
+      -Werror,
+      -Wpedantic,
+      -Wall,
+      -Wextra,
+      -Wconversion,
+      -Wshadow,
+      -Wuninitialized,
+      -Wcast-align,
+      -Wfloat-equal,
+      -Wformat=2,
+      -Wnrvo,
+    ]

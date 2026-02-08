@@ -1,0 +1,159 @@
+# clang-format style options: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+# misc settings
+Language: Cpp
+Standard: Latest
+ColumnLimit: 240
+IndentWidth: 2
+ContinuationIndentWidth: 2
+UseTab: Never
+MaxEmptyLinesToKeep: 1
+LineEnding: LF
+RemoveEmptyLinesInUnwrappedLines: true
+KeepEmptyLines:
+  AtEndOfFile: true
+  AtStartOfBlock: true
+  AtStartOfFile: false
+BreakAdjacentStringLiterals: true
+SortUsingDeclarations: Never
+
+# penalty, higher penalty = less priority
+PenaltyExcessCharacter: 600
+PenaltyBreakAssignment: 1000
+PenaltyBreakBeforeFirstCallParameter: 100
+PenaltyBreakBeforeMemberAccess: 5
+PenaltyBreakComment: 0
+PenaltyBreakFirstLessLess: 30
+PenaltyBreakOpenParenthesis: 10
+PenaltyBreakScopeResolution: 10000
+PenaltyBreakString: 500
+PenaltyBreakTemplateDeclaration: 3
+PenaltyIndentedWhitespace: 1
+PenaltyReturnTypeOnItsOwnLine: 20
+
+# comment
+AlignTrailingComments: Leave
+SpacesBeforeTrailingComments: 1
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: -1
+
+#preprocesser / macro
+IndentPPDirectives: None
+AlignConsecutiveMacros:
+  Enabled: false
+  AcrossComments: false
+AlignEscapedNewlines: LeftWithLastLine
+SortIncludes: CaseInsensitive
+
+# declaration / initialization / assignment
+AlignConsecutiveDeclarations:
+  Enabled: false
+  AcrossEmptyLines: false
+  AcrossComments: false
+AlignConsecutiveAssignments:
+  Enabled: false
+  AcrossEmptyLines: false
+  AcrossComments: false
+  AlignCompound: true
+  PadOperators: true
+IntegerLiteralSeparator:
+  Decimal: 3
+  DecimalMinDigits: 6
+  Binary: 4
+  Hex: 2
+PointerAlignment: Left
+ReferenceAlignment: Left
+AlignArrayOfStructures: Right
+
+# operator
+AlignOperands: Align
+BreakBinaryOperations: Never
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: true
+
+# control statement
+AllowShortBlocksOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+IndentCaseLabels: true
+IndentCaseBlocks: false
+AllowShortCaseLabelsOnASingleLine: false
+AlignConsecutiveShortCaseStatements:
+  Enabled: false
+  AlignCaseColons: true
+AllowShortLoopsOnASingleLine: false
+IndentGotoLabels: false
+
+# function
+AlignAfterOpenBracket: BlockIndent
+AllowShortFunctionsOnASingleLine: Inline
+BinPackArguments: true
+AllowAllArgumentsOnNextLine: true
+BinPackParameters: BinPack
+AllowAllParametersOfDeclarationOnNextLine: true
+BreakAfterAttributes: Leave
+IndentWrappedFunctionNames: false
+SpaceAfterOperatorKeyword: true
+
+# lambda expression
+AllowShortLambdasOnASingleLine: Inline
+LambdaBodyIndentation: OuterScope
+
+# class
+IndentAccessModifiers: false
+ConstructorInitializerIndentWidth: 2
+PackConstructorInitializers: BinPack
+BreakConstructorInitializers: BeforeColon
+SpaceBeforeCtorInitializerColon: true
+BreakInheritanceList: BeforeComma
+SpaceBeforeInheritanceColon: true
+AlignConsecutiveBitFields:
+  Enabled: true
+  AcrossComments: true
+BitFieldColonSpacing: Both
+AllowShortEnumsOnASingleLine: false
+
+#namespace / extern / export
+IndentExternBlock: false
+FixNamespaceComments: true
+ShortNamespaceLines: 0
+NamespaceIndentation: None
+IndentExportBlock: false
+CompactNamespaces: true
+WrapNamespaceBodyWithEmptyLines: Always
+AllowShortNamespacesOnASingleLine: false
+
+# template
+SpaceAfterTemplateKeyword: true
+BreakBeforeTemplateCloser: true
+BreakTemplateDeclarations: Leave
+BreakBeforeConceptDeclarations: Always
+IndentRequiresClause: true
+RequiresExpressionIndentation: OuterScope
+AllowShortCompoundRequirementOnASingleLine: true
+RequiresClausePosition: OwnLine
+
+# parentheses / brace
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: Never
+  AfterExternBlock: false
+  AfterFunction: true
+  AfterClass: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterEnum: true
+  BeforeLambdaBody: true
+  BeforeElse: true
+  BeforeCatch: true
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+Cpp11BracedListStyle: true
+BinPackLongBracedList: true
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterRequiresInClause: true
+  AfterRequiresInExpression: false
