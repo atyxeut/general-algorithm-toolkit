@@ -4,11 +4,11 @@ import subprocess
 from pathlib import Path
 
 # > python3 init.py
-#   by default, specify `my_clang` toolchain
-# > python3 init.py my_gcc
-#   specify `my_gcc` toolchain
+#   by default, specify `llvm` toolchain
+# > python3 init.py gcc
+#   specify `gcc` toolchain
 parser = argparse.ArgumentParser(add_help=False)
-parser.add_argument("toolchain", type=str, nargs="?", default="my_clang")
+parser.add_argument("toolchain", type=str, nargs="?", default="llvm")
 argv = parser.parse_args()
 
 
@@ -26,8 +26,7 @@ def main():
   remove(Path(".xmake"))
   remove(Path("build"))
 
-  xmake_toolchain = argv.toolchain
-  subprocess.run(["xmake", "f", "-v", "--toolchain=" + xmake_toolchain])
+  subprocess.run(["xmake", "f", "-v", "--toolchain=" + argv.toolchain])
   subprocess.run(
     ["xmake", "project", "-k", "compile_commands", "--outputdir=build"],
     text=True,

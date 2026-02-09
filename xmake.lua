@@ -2,61 +2,51 @@ set_xmakever("3.0.6")
 set_project("aty-general-algorithm-toolbox")
 
 add_rules("mode.debug", "mode.release")
+
 set_config("builddir", "build")
-set_config("plat", "mingw")
+
+if is_host("window") then
+  -- recommended gcc binary: https://gcc-mcf.lhmouse.com/
+  set_config("plat", "mingw")
+end
 
 set_languages("c++latest")
 
-local my_gcc_sdk_dir
-if is_host("windows") then
-  -- binary from https://gcc-mcf.lhmouse.com/
-  my_gcc_sdk_dir = "C:/ucrt64"
-end
-
-local my_clang_sdk_dir
-if is_host("windows") then
-  -- binary from https://github.com/mstorsjo/llvm-mingw
-  my_clang_sdk_dir = "C:/llvm-mingw-ucrt-x86_64"
-end
-
-toolchain("my_gcc")
-  set_kind("standalone")
-  set_sdkdir(my_gcc_sdk_dir)
-toolchain_end()
-
-toolchain("my_clang")
-  set_kind("standalone")
-  set_sdkdir(my_clang_sdk_dir)
-  set_toolset("cxx", "clang", "clang++")
-  set_toolset("ld", "clang++", "clang")
-toolchain_end()
-add_cxxflags("my_clang::-stdlib=libc++")
-
-if get_config("toolchain") == "my_clang" then
-  set_toolchains("my_clang")
-  target("std_modules")
-    set_kind("object")
-    add_includedirs(my_clang_sdk_dir .. "/include/c++/v1")
-    add_files(my_clang_sdk_dir .. "/share/libc++/v1/*.cppm", {public = true})
-  target_end()
-elseif get_config("toolchain") == "my_gcc" then
-  set_toolchains("gcc")
+if get_config("toolchain") == "llvm" then
   if is_host("windows") then
-    add_syslinks("stdc++exp") -- gcc16 still requires this on Windows
+    -- binary from https://github.com/mstorsjo/llvm-mingw
+    local llvm_sdk_dir = "C:/llvm-mingw-ucrt-x86_64"
+    -- suppress `warning: std and std.compat modules not found! maybe try to add --sdk=<PATH/TO/LLVM> or install libc++`
+    set_policy("build.c++.modules.std", false)
+
+    target("std_modules")
+      set_kind("object")
+      add_includedirs(llvm_sdk_dir .. "/include/c++/v1")
+      add_files(llvm_sdk_dir .. "/share/libc++/v1/*.cppm", { public = true })
+    target_end()
+  elseif is_host("macosx") then
+    set_policy("build.c++.modules", true)
+    -- binary from Homebrew: brew install llvm
+    add_ldflags("-L/usr/local/opt/llvm@21/lib/c++")
   end
 end
 
-target("gat")
+if get_config("toolchain") == "gcc" and is_host("windows") then
+  -- gcc 16 still requires this on Windows
+  add_syslinks("stdc++exp")
+end
+
+target("gatk")
   set_kind("object")
-  if get_config("toolchain") == "my_clang" then
+  if get_config("toolchain") == "llvm" and is_host("windows") then
     add_deps("std_modules")
   end
-  add_files("src/**.cppm", {public = true})
+  add_files("src/**.cppm", { public = true })
 target_end()
 
-target("test")
+target("test_main")
   set_kind("binary")
-  add_deps("gat")
-  add_files("test.cpp")
+  add_deps("gatk")
+  add_files("test/main.cpp")
   set_optimize("faster")
 target_end()
