@@ -1,0 +1,35 @@
+// Copyright 2026 atyxeut
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// general template metaprogramming utilities
+export module aty.gatk.util.tmp;
+
+import std;
+
+namespace aty::gatk::tmp {
+
+export template <typename>
+struct is_std_array : std::false_type
+{
+};
+
+export template <typename T, std::size_t N>
+struct is_std_array<std::array<T, N>> : std::true_type
+{
+};
+
+export template <typename T>
+constexpr bool is_std_array_v = is_std_array<T>::value;
+
+} // namespace aty::gatk::tmp
