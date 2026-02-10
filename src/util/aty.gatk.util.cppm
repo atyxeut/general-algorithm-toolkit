@@ -107,4 +107,43 @@ export template <typename TElem, std::integral TDim, typename... Ts>
     return std::vector(static_cast<std::size_t>(first_dim_size), make_vector<TElem>(std::forward<Ts>(args)...));
 }
 
+// same values map to the same rank
+export template <std::ranges::forward_range TRange>
+[[nodiscard]] constexpr auto compress_coordinates(const TRange& range)
+{
+  std::vector<std::ranges::range_value_t<TRange>> tmp(std::ranges::begin(range), std::ranges::end(range));
+  std::ranges::sort(tmp);
+  const auto [tmp_end, _] = std::ranges::unique(tmp);
+
+  const auto n = std::ranges::size(range);
+  std::vector<int> rank(n);
+  const auto tmp_begin = std::ranges::begin(tmp);
+  for (std::size_t i = 0; const auto& elem : range)
+    rank[i++] = static_cast<int>(std::ranges::lower_bound(tmp_begin, tmp_end, elem) - tmp_begin);
+
+  return rank;
+}
+
+// every value maps to a unique rank, smaller index in the original range maps to a lower rank
+export template <std::ranges::input_range TRange>
+[[nodiscard]] constexpr auto compress_coordinates_to_unique(TRange&& range)
+{
+  const auto n = std::ranges::size(range);
+  std::vector<std::pair<std::ranges::range_value_t<TRange>, std::size_t>> tmp;
+  tmp.reserve(n);
+  for (std::size_t i = 0; auto&& elem : range) {
+    if constexpr (std::is_rvalue_reference_v<TRange>)
+      tmp.emplace_back(std::move(elem), i++);
+    else
+      tmp.emplace_back(elem, i++);
+  }
+  std::ranges::sort(tmp);
+
+  std::vector<int> rank(n);
+  for (std::size_t i = 0; i < n; ++i)
+    rank[tmp[i].second] = static_cast<int>(i);
+
+  return rank;
+}
+
 } // namespace aty::gatk
