@@ -240,6 +240,42 @@ using make_unsigned_t = make_unsigned<T>::type;
 
 } // namespace aty::gatk::tmp
 
+namespace aty::gatk::big_integer {
+
+}
+
+export namespace aty::gatk::tmp {
+
+template <typename>
+struct is_no_cv_big_integer : std::false_type
+{
+};
+
+// template <>
+// struct is_no_cv_big_integer<...> : std::true_type
+// {
+// };
+
+template <typename T>
+constexpr bool is_no_cv_big_integer_v = is_no_cv_big_integer<T>::value;
+
+template <typename T>
+using is_big_integer = is_no_cv_big_integer<std::remove_cv_t<T>>;
+
+template <typename T>
+constexpr bool is_big_integer_v = is_big_integer<T>::value;
+
+template <typename T>
+concept signed_integral = fixed_width_signed_integral<T> || is_big_integer_v<T>;
+
+template <typename T>
+concept integral = signed_integral<T> || fixed_width_unsigned_integral<T>;
+
+template <typename T>
+concept nonbool_integral = integral<T> && !boolean<T>;
+
+} // namespace aty::gatk::tmp
+
 namespace aty::gatk::tmp {
 
 template <typename T, usize = (sizeof(T) < sizeof(i32) ? 0 : sizeof(T))>
@@ -263,36 +299,43 @@ struct make_larger_width_selector_for_standard<T, sizeof(i64)>
   using type = std::conditional_t<std::signed_integral<T>, claim_cv_t<T, i128>, claim_cv_t<T, u128>>;
 };
 
-template <typename T, typename U = std::remove_cv_t<T>>
+template <typename T, typename = std::remove_cv_t<T>, bool = is_big_integer_v<T>>
 struct make_larger_width_selector_for_custom;
 
 template <typename T>
-struct make_larger_width_selector_for_custom<T, i128>
+struct make_larger_width_selector_for_custom<T, i128, false>
 {
   using type = claim_cv_t<T, fixed_width_integer::i<256>>;
 };
 
 template <typename T>
-struct make_larger_width_selector_for_custom<T, u128>
+struct make_larger_width_selector_for_custom<T, u128, false>
 {
   using type = claim_cv_t<T, fixed_width_integer::u<256>>;
 };
 
 template <typename T, usize WidthBits>
-struct make_larger_width_selector_for_custom<T, fixed_width_integer::i<WidthBits>>
+struct make_larger_width_selector_for_custom<T, fixed_width_integer::i<WidthBits>, false>
 {
   using type = claim_cv_t<T, fixed_width_integer::i<WidthBits * 2>>;
 };
 
 template <typename T, usize WidthBits>
-struct make_larger_width_selector_for_custom<T, fixed_width_integer::u<WidthBits>>
+struct make_larger_width_selector_for_custom<T, fixed_width_integer::u<WidthBits>, false>
 {
   using type = claim_cv_t<T, fixed_width_integer::u<WidthBits * 2>>;
 };
 
-// for the given fixed-width integer type: obtains i/u32 if its width is smaller than 32 bits, otherwise obtains a fixed-width integer type with double width
+template <typename T>
+struct make_larger_width_selector_for_custom<T, std::remove_cv_t<T>, true>
+{
+  using type = T;
+};
+
+// for the given fixed-width integer type: obtain i/u32 if its width is smaller than 32 bits, otherwise obtain a fixed-width integer type with double width
+// for a big integer type: obtain itself
 // cv-qualifiers and signedness are kept
-export template <typename T>
+export template <integral T>
 using make_larger_width = std::conditional_t<sizeof(T) <= sizeof(i64), make_larger_width_selector_for_standard<T>, make_larger_width_selector_for_custom<T>>;
 
 export template <typename T>

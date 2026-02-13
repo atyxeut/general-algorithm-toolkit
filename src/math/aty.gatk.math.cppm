@@ -16,3 +16,10 @@ export module aty.gatk.math;
 
 export import aty.gatk.math.floating_point;
 export import aty.gatk.math.integer;
+
+export namespace aty::gatk::tmp {
+
+template <typename T>
+concept arithmetic = integral<T> || floating_point<T>;
+
+} // namespace aty::gatk::tmp

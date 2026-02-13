@@ -114,48 +114,85 @@ concept ieee754_floating_point = ieee754_binary_floating_point<T> || ieee754_dec
 
 } // namespace aty::gatk::tmp
 
+namespace aty::gatk::big_decimal {
+
+}
+
+export namespace aty::gatk::tmp {
+
+template <typename>
+struct is_no_cv_big_decimal : std::false_type
+{
+};
+
+// template <>
+// struct is_no_cv_big_decimal<...> : std::true_type
+// {
+// };
+
+template <typename T>
+constexpr bool is_no_cv_big_decimal_v = is_no_cv_big_decimal<T>::value;
+
+template <typename T>
+using is_big_decimal = is_no_cv_big_decimal<std::remove_cv_t<T>>;
+
+template <typename T>
+constexpr bool is_big_decimal_v = is_big_decimal<T>::value;
+
+template <typename T>
+concept floating_point = ieee754_floating_point<T> || is_big_decimal_v<T>;
+
+} // namespace aty::gatk::tmp
+
 namespace aty::gatk::tmp {
 
-template <typename T, typename = std::remove_cv_t<T>>
+template <typename T, typename = std::remove_cv_t<T>, bool = is_big_decimal_v<T>>
 struct make_higher_precision_selector;
 
 template <typename T>
-struct make_higher_precision_selector<T, f32>
+struct make_higher_precision_selector<T, f32, false>
 {
   using type = claim_cv_t<T, f64>;
 };
 
 template <typename T>
-struct make_higher_precision_selector<T, f64>
+struct make_higher_precision_selector<T, f64, false>
 {
   using type = claim_cv_t<T, f80>;
 };
 
 template <typename T>
-struct make_higher_precision_selector<T, f80>
+struct make_higher_precision_selector<T, f80, false>
 {
   using type = claim_cv_t<T, f128>;
 };
 
 template <typename T>
-struct make_higher_precision_selector<T, f128>
+struct make_higher_precision_selector<T, f128, false>
 {
   using type = claim_cv_t<T, ieee754_float::f<256>>;
 };
 
 template <typename T, usize PrecisionBits>
-struct make_higher_precision_selector<T, ieee754_float::f<PrecisionBits>>
+struct make_higher_precision_selector<T, ieee754_float::f<PrecisionBits>, false>
 {
   using type = claim_cv_t<T, ieee754_float::f<PrecisionBits * 2>>;
 };
 
 template <typename T, usize PrecisionBits>
-struct make_higher_precision_selector<T, ieee754_float::d<PrecisionBits>>
+struct make_higher_precision_selector<T, ieee754_float::d<PrecisionBits>, false>
 {
   using type = claim_cv_t<T, ieee754_float::d<PrecisionBits * 2>>;
 };
 
-// for the given floating-point type, obtains a floating-point type that has double precision
+template <typename T>
+struct make_higher_precision_selector<T, std::remove_cv_t<T>, true>
+{
+  using type = T;
+};
+
+// for the given floating-point type, obtain a floating-point type that has double precision
+// for a big decimal type: obtain itself
 // cv-qualifiers are kept
 export template <typename T>
 using make_higher_precision = make_higher_precision_selector<T>;
