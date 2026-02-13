@@ -121,4 +121,34 @@ export template <typename TElem, std::integral TDim, typename... Ts>
     return std::vector(static_cast<std::size_t>(first_dim_size), make_vector<TElem>(std::forward<Ts>(args)...));
 }
 
+export namespace tmp {
+
+template <typename T>
+struct is_std_ratio : std::false_type
+{
+};
+
+template <std::intmax_t Numerator, std::intmax_t Denominator>
+struct is_std_ratio<std::ratio<Numerator, Denominator>> : std::true_type
+{
+};
+
+template <typename T>
+constexpr bool is_std_ratio_v = is_std_ratio<T>::value;
+
+template <typename T>
+struct is_std_duration : std::false_type
+{
+};
+
+template <typename TRep, typename TPeriod>
+struct is_std_duration<std::chrono::duration<TRep, TPeriod>> : std::true_type
+{
+};
+
+template <typename T>
+constexpr bool is_std_duration_v = is_std_duration<T>::value;
+
+} // namespace tmp
+
 } // namespace aty::gatk
