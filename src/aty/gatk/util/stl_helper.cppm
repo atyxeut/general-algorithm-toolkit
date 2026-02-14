@@ -16,6 +16,9 @@ export module aty.gatk.util.stl_helper;
 
 import std;
 
+import aty.gatk.memory;
+import aty.gatk.util.tmp;
+
 namespace aty::gatk {
 
 template <typename, std::size_t...>
@@ -86,25 +89,82 @@ export template <typename TElem, std::size_t... Dims, typename T>
   return arr;
 }
 
-template <typename T, std::size_t DimCnt>
-  requires (DimCnt > 0)
-struct vector_impl
+template <typename TCurAllocatorList, std::size_t DimCnt>
+struct adjust_allocator_type_list;
+
+template <typename... TCurAllocators, std::size_t DimCnt>
+struct adjust_allocator_type_list<std::tuple<TCurAllocators...>, DimCnt>
 {
-  using type = std::vector<typename vector_impl<T, DimCnt - 1>::type>;
+  using type = tmp::concat_t<std::tuple<TCurAllocators...>, std::conditional_t<sizeof...(TCurAllocators) < DimCnt, std::tuple<memory::std_allocator_tag>, std::tuple<>>>;
 };
 
-template <typename T>
-struct vector_impl<T, 1>
+template <typename TCurAllocatorList, std::size_t DimCnt>
+using adjust_allocator_type_list_t = adjust_allocator_type_list<TCurAllocatorList, DimCnt>::type;
+
+template <typename TCurElement, typename TAllocatorList>
+class cur_dim_allocator;
+
+template <typename TCurElement, typename... TAllocators>
+class cur_dim_allocator<TCurElement, std::tuple<TAllocators...>>
 {
-  using type = std::vector<T>;
+  using last_allocator_type_ = tmp::back_t<std::tuple<TAllocators...>>;
+
+public:
+  using type = std::conditional_t<std::same_as<last_allocator_type_, memory::std_allocator_tag>, std::allocator<TCurElement>, last_allocator_type_>;
 };
+
+template <typename TCurElement, typename TAllocatorList>
+using cur_dim_allocator_t = cur_dim_allocator<TCurElement, TAllocatorList>::type;
+
+template <typename T, std::size_t DimCnt, typename TAllocatorList>
+  requires (DimCnt > 0)
+class vector_impl;
+
+template <typename T, std::size_t DimCnt, typename TInnermostDimAllocator, typename... TAllocators>
+class vector_impl<T, DimCnt, std::tuple<TInnermostDimAllocator, TAllocators...>>
+{
+  using adjusted_allocator_type_list_ = adjust_allocator_type_list_t<std::tuple<TInnermostDimAllocator, TAllocators...>, DimCnt>;
+  using element_type_ = vector_impl<T, DimCnt - 1, tmp::pop_back_t<adjusted_allocator_type_list_>>::type;
+
+public:
+  using type = std::vector<element_type_, cur_dim_allocator_t<element_type_, adjusted_allocator_type_list_>>;
+};
+
+template <typename T, typename TAllocator>
+class vector_impl<T, 1, std::tuple<TAllocator>>
+{
+public:
+  using type = std::vector<T, cur_dim_allocator_t<T, std::tuple<TAllocator>>>;
+};
+
+template <typename T, std::size_t DimCnt = 1, typename TAllocatorList = std::tuple<std::allocator<T>>>
+  requires (std::tuple_size_v<TAllocatorList> <= DimCnt)
+using vector_impl_t = vector_impl<T, DimCnt, TAllocatorList>::type;
 
 // aty::gatk::vector<int> vec1d;
 //   same as: std::vector<int> vec1d;
 // aty::gatk::vector<int, 4> vec4d;
 //   same as: std::vector<std::vector<std::vector<std::vector<int>>>> vec4d;
-export template <typename T, std::size_t DimCnt = 1>
-using vector = vector_impl<T, DimCnt>::type;
+export template <typename T, std::size_t DimCnt = 1, typename TInnermostDimAllocator = std::allocator<T>, typename... TAllocators>
+  requires (sizeof...(TAllocators) < DimCnt)
+using vector = vector_impl<T, DimCnt, std::tuple<TInnermostDimAllocator, TAllocators...>>::type;
+
+template <typename TElem, typename TAllocatorList, std::integral TDim, typename... Ts>
+  requires (sizeof(TDim) <= sizeof(std::size_t) && sizeof...(Ts) > 0 && std::tuple_size_v<TAllocatorList> <= sizeof...(Ts))
+[[nodiscard]] constexpr auto make_vector_impl(TDim first_dim_size, Ts&&... args)
+{
+  using adjusted_allocator_type_list = adjust_allocator_type_list_t<TAllocatorList, sizeof...(Ts)>;
+  if constexpr (sizeof...(Ts) == 1) {
+    using cur_dim_allocator_type = cur_dim_allocator_t<TElem, adjusted_allocator_type_list>;
+    return vector<TElem, 1, cur_dim_allocator_type>(static_cast<std::size_t>(first_dim_size), static_cast<TElem>(args)...);
+  }
+  else {
+    using inner_allocator_type_list = tmp::pop_back_t<adjusted_allocator_type_list>;
+    using inner_element_type = vector_impl_t<TElem, sizeof...(Ts) - 1, inner_allocator_type_list>;
+    using cur_dim_allocator_type = cur_dim_allocator_t<inner_element_type, adjusted_allocator_type_list>;
+    return vector<inner_element_type, 1, cur_dim_allocator_type>(static_cast<std::size_t>(first_dim_size), make_vector_impl<TElem, inner_allocator_type_list>(std::forward<Ts>(args)...));
+  }
+}
 
 // auto vec3d = aty::gatk::make_vector<int>(x, y, z, 1);
 //   same as: auto vec3d = std::vector<std::vector<std::vector<int>>>(
@@ -112,19 +172,15 @@ using vector = vector_impl<T, DimCnt>::type;
 //                           std::vector<std::vector<int>>(y, std::vector<int>(z, 1))
 //                         );
 // constexpr usage example (error if aty::gatk::make_vector is not constexpr):
-//   std::cout << [](const std::vector<int>& vec, int sum = 0) consteval
-//   {
+//   std::cout << [](const std::vector<int>& vec, int sum = 0) consteval {
 //     std::ranges::for_each(vec, [&sum](int elem) { return sum += elem; });
 //     return sum;
 //   }(aty::gatk::make_vector<int>(10, -1)) << "\n";
-export template <typename TElem, std::integral TDim, typename... Ts>
-  requires (sizeof(TDim) <= sizeof(std::size_t) && sizeof...(Ts) > 0)
+export template <typename TElem, typename TInnermostDimAllocator = memory::std_allocator_tag, typename... TAllocators, std::integral TDim, typename... Ts>
+  requires (sizeof(TDim) <= sizeof(std::size_t) && sizeof...(Ts) > 0 && sizeof...(TAllocators) < sizeof...(Ts))
 [[nodiscard]] constexpr auto make_vector(TDim first_dim_size, Ts&&... args)
 {
-  if constexpr (sizeof...(Ts) == 1)
-    return std::vector(static_cast<std::size_t>(first_dim_size), static_cast<TElem>(args)...);
-  else
-    return std::vector(static_cast<std::size_t>(first_dim_size), make_vector<TElem>(std::forward<Ts>(args)...));
+  return make_vector_impl<TElem, std::tuple<TInnermostDimAllocator, TAllocators...>>(first_dim_size, std::forward<Ts>(args)...);
 }
 
 export namespace tmp {

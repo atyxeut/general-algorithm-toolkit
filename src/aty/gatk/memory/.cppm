@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk;
+export module aty.gatk.memory;
 
-export import aty.gatk.data_structure;
-export import aty.gatk.debug;
-export import aty.gatk.math;
-export import aty.gatk.memory;
-export import aty.gatk.random;
-export import aty.gatk.util;
+namespace aty::gatk::memory {
+
+export struct std_allocator_tag
+{
+};
+
+} // namespace aty::gatk::memory
