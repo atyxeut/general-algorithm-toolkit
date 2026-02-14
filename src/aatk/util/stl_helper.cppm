@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.util.stl_helper;
+export module aatk.util.stl_helper;
 
 import std;
 
-import aty.gatk.memory;
-import aty.gatk.util.tmp;
+import aatk.memory;
+import aatk.util.tmp;
 
-namespace aty::gatk {
+namespace aatk {
 
 template <typename, std::size_t...>
 struct array_impl;
@@ -36,7 +36,7 @@ struct array_impl<T, Dim, Dims...>
   using type = std::array<typename array_impl<T, Dims...>::type, Dim>;
 };
 
-// aty::gatk::array<int, 3, 5, 2> arr3d {};
+// aatk::array<int, 3, 5, 2> arr3d {};
 //   same as: std::array<std::array<std::array<int, 2>, 5>, 3> arr3d {};
 export template <typename T, std::size_t... Dims>
 using array = array_impl<T, Dims...>::type;
@@ -64,10 +64,10 @@ constexpr bool is_std_array_v = is_std_array<T>::value;
 
 } // namespace tmp
 
-// aty::gatk::array<int, 3, 5, 2, 10> arr4d;
+// aatk::array<int, 3, 5, 2, 10> arr4d;
 // int val = -1;
-// aty::gatk::fill_array(arr4d, val);
-//   set every element of a aty::gatk::array to val
+// aatk::fill_array(arr4d, val);
+//   set every element of a aatk::array to val
 export template <typename TElem, std::size_t Dim, typename T>
 constexpr void fill_array(std::array<TElem, Dim>& arr, const T& val)
 {
@@ -78,9 +78,9 @@ constexpr void fill_array(std::array<TElem, Dim>& arr, const T& val)
     arr.fill(static_cast<TElem>(val));
 }
 
-// auto arr4d = aty::gatk::make_array<int, 5, 8, 3, 2>(val);
-//   combines aty::gatk::array<int, 5, 8, 3, 2> arr4d;
-//        and aty::gatk::fill_array(arr4d, val);
+// auto arr4d = aatk::make_array<int, 5, 8, 3, 2>(val);
+//   combines aatk::array<int, 5, 8, 3, 2> arr4d;
+//        and aatk::fill_array(arr4d, val);
 export template <typename TElem, std::size_t... Dims, typename T>
 [[nodiscard]] constexpr auto make_array(const T& val)
 {
@@ -101,16 +101,26 @@ struct adjust_allocator_type_list<std::tuple<TCurAllocators...>, DimCnt>
 template <typename TCurAllocatorList, std::size_t DimCnt>
 using adjust_allocator_type_list_t = adjust_allocator_type_list<TCurAllocatorList, DimCnt>::type;
 
-template <typename TCurElement, typename TAllocatorList>
-class cur_dim_allocator;
+template <typename TCurElement, typename TAllocatorList, typename TLastAllocator = tmp::back_t<TAllocatorList>>
+  requires (std::tuple_size_v<TAllocatorList> > 0)
+struct cur_dim_allocator;
 
 template <typename TCurElement, typename... TAllocators>
-class cur_dim_allocator<TCurElement, std::tuple<TAllocators...>>
+struct cur_dim_allocator<TCurElement, std::tuple<TAllocators...>, memory::std_allocator_tag>
 {
-  using last_allocator_type_ = tmp::back_t<std::tuple<TAllocators...>>;
+  using type = std::allocator<TCurElement>;
+};
 
-public:
-  using type = std::conditional_t<std::same_as<last_allocator_type_, memory::std_allocator_tag>, std::allocator<TCurElement>, last_allocator_type_>;
+template <typename TCurElement, typename... TAllocators>
+struct cur_dim_allocator<TCurElement, std::tuple<TAllocators...>, memory::std_pmr_allocator_tag>
+{
+  using type = std::pmr::polymorphic_allocator<TCurElement>;
+};
+
+template <typename TCurElement, typename... TAllocators, typename TLastAllocator>
+struct cur_dim_allocator<TCurElement, std::tuple<TAllocators...>, TLastAllocator>
+{
+  using type = TLastAllocator;
 };
 
 template <typename TCurElement, typename TAllocatorList>
@@ -141,9 +151,9 @@ template <typename T, std::size_t DimCnt = 1, typename TAllocatorList = std::tup
   requires (std::tuple_size_v<TAllocatorList> <= DimCnt)
 using vector_impl_t = vector_impl<T, DimCnt, TAllocatorList>::type;
 
-// aty::gatk::vector<int> vec1d;
+// aatk::vector<int> vec1d;
 //   same as: std::vector<int> vec1d;
-// aty::gatk::vector<int, 4> vec4d;
+// aatk::vector<int, 4> vec4d;
 //   same as: std::vector<std::vector<std::vector<std::vector<int>>>> vec4d;
 export template <typename T, std::size_t DimCnt = 1, typename TInnermostDimAllocator = std::allocator<T>, typename... TAllocators>
   requires (sizeof...(TAllocators) < DimCnt)
@@ -166,16 +176,16 @@ template <typename TElem, typename TAllocatorList, std::integral TDim, typename.
   }
 }
 
-// auto vec3d = aty::gatk::make_vector<int>(x, y, z, 1);
+// auto vec3d = aatk::make_vector<int>(x, y, z, 1);
 //   same as: auto vec3d = std::vector<std::vector<std::vector<int>>>(
 //                           x,
 //                           std::vector<std::vector<int>>(y, std::vector<int>(z, 1))
 //                         );
-// constexpr usage example (error if aty::gatk::make_vector is not constexpr):
+// constexpr usage example (error if aatk::make_vector is not constexpr):
 //   std::cout << [](const std::vector<int>& vec, int sum = 0) consteval {
 //     std::ranges::for_each(vec, [&sum](int elem) { return sum += elem; });
 //     return sum;
-//   }(aty::gatk::make_vector<int>(10, -1)) << "\n";
+//   }(aatk::make_vector<int>(10, -1)) << "\n";
 export template <typename TElem, typename TInnermostDimAllocator = memory::std_allocator_tag, typename... TAllocators, std::integral TDim, typename... Ts>
   requires (sizeof(TDim) <= sizeof(std::size_t) && sizeof...(Ts) > 0 && sizeof...(TAllocators) < sizeof...(Ts))
 [[nodiscard]] constexpr auto make_vector(TDim first_dim_size, Ts&&... args)
@@ -225,4 +235,4 @@ constexpr bool is_std_duration_v = is_std_duration<T>::value;
 
 } // namespace tmp
 
-} // namespace aty::gatk
+} // namespace aatk

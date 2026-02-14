@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.util.misc;
+export module aatk.util.misc;
 
 import std;
 
-import aty.gatk.math.integer;
+import aatk.math.integer;
 
-namespace aty::gatk {
+namespace aatk {
 
 namespace tower_of_hanoi {
 
@@ -237,4 +237,4 @@ export void general_form(u32 disk_cnt, std::span<const u32> from_list, std::span
 
 } // namespace tower_of_hanoi
 
-} // namespace aty::gatk
+} // namespace aatk

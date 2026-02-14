@@ -1,8 +1,26 @@
+-- Copyright 2026 atyxeut
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
 set_xmakever("3.0.6")
-set_project("aty-general-algorithm-toolkit")
+set_project("atyxeut-algorithm-toolkit")
 set_languages("c++latest")
 
 add_rules("mode.debug", "mode.release")
+
+if is_mode("release") then
+  add_defines("NDEBUG")
+end
 
 set_config("builddir", "build")
 set_config("runtimes", "c++_shared")
@@ -23,14 +41,4 @@ if get_config("toolchain") == "gcc" and is_host("windows") then
   add_syslinks("stdc++exp")
 end
 
-target("gatk")
-  set_kind("object")
-  add_files("src/**.cppm", { public = true })
-target_end()
-
-target("test_main")
-  set_kind("binary")
-  add_deps("gatk")
-  add_files("test/main.cpp")
-  set_optimize("faster")
-target_end()
+includes("src")

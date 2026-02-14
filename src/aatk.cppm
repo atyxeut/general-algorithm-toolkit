@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.debug;
+export module aatk;
 
-export import aty.gatk.debug.benchmark;
+export import aatk.data_structure;
+export import aatk.debug;
+export import aatk.math;
+export import aatk.memory;
+export import aatk.random;
+export import aatk.util;

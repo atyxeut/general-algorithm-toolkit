@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.random;
+export module aatk.random;
 
 import std;
 
-import aty.gatk.data_structure.graph;
-import aty.gatk.math.integer;
+import aatk.data_structure.graph;
+import aatk.math.integer;
 
-export namespace aty::gatk::random {
+export namespace aatk::random {
 
 inline const auto time_seed = std::chrono::steady_clock::now().time_since_epoch().count();
 inline std::random_device seed_generator;
@@ -46,15 +46,15 @@ template <typename T, typename TEngine = std::mt19937>
   return uniform_distribution(l, r)(engine);
 }
 
-} // namespace aty::gatk::random
+} // namespace aatk::random
 
-namespace aty::gatk::random::generate {
+namespace aatk::random::generate {
 
 constexpr char decimal_digit_character[10] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
-} // namespace aty::gatk::random::generate
+} // namespace aatk::random::generate
 
-export namespace aty::gatk::random::generate {
+export namespace aatk::random::generate {
 
 template <bool OnlyPositiveInteger = false>
 [[nodiscard]] auto integer(usize integer_length)
@@ -133,4 +133,4 @@ template <bool FlowerGraph = false, std::integral TVertex, std::integral TWeight
   return data;
 }
 
-} // namespace aty::gatk::random::generate
+} // namespace aatk::random::generate

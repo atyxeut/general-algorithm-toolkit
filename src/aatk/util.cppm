@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.util;
+export module aatk.util;
 
 import std;
 
-export import aty.gatk.util.misc;
-export import aty.gatk.util.stl_helper;
-export import aty.gatk.util.tmp;
+export import aatk.util.misc;
+export import aatk.util.stl_helper;
+export import aatk.util.tmp;
 
-namespace aty::gatk {
+namespace aatk {
 
 // same values map to the same rank
 export template <std::ranges::forward_range TRange>
@@ -61,4 +61,4 @@ export template <std::ranges::input_range TRange>
   return rank;
 }
 
-} // namespace aty::gatk
+} // namespace aatk

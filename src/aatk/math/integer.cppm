@@ -19,11 +19,11 @@ module;
 #include <__msvc_int128.hpp>
 #endif
 
-export module aty.gatk.math.integer;
+export module aatk.math.integer;
 
 import std;
 
-import aty.gatk.util.tmp;
+import aatk.util.tmp;
 
 // clang-format off
 export {
@@ -43,7 +43,7 @@ using usize = std::size_t;
 }
 // clang-format on
 
-export namespace aty::gatk {
+export namespace aatk {
 
 namespace tmp {
 
@@ -125,7 +125,7 @@ constexpr bool is_custom_fixed_width_unsigned_integral_v = is_custom_fixed_width
 
 } // namespace tmp
 
-} // namespace aty::gatk
+} // namespace aatk
 
 // clang-format off
 export {
@@ -138,14 +138,14 @@ __extension__ using u128 = unsigned __int128;
 using i128 = std::_Signed128;
 using u128 = std::_Unsigned128;
 #else
-using i128 = ::aty::gatk::fixed_width_integer::i<128>;
-using u128 = ::aty::gatk::fixed_width_integer::u<128>;
+using i128 = ::aatk::fixed_width_integer::i<128>;
+using u128 = ::aatk::fixed_width_integer::u<128>;
 #endif
 
 }
 // clang-format on
 
-export namespace aty::gatk::tmp {
+export namespace aatk::tmp {
 
 template <typename T>
 concept fixed_width_signed_integral = std::signed_integral<T> || std::same_as<std::remove_cv_t<T>, i128> || is_custom_fixed_width_signed_integral_v<T>;
@@ -162,9 +162,9 @@ concept fixed_width_integral = fixed_width_signed_integral<T> || fixed_width_uns
 template <typename T>
 concept nonbool_fixed_width_integral = fixed_width_integral<T> && !boolean<T>;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp
 
-namespace aty::gatk::tmp {
+namespace aatk::tmp {
 
 template <typename T, typename = std::remove_cv_t<T>>
 struct make_signed_selector
@@ -238,13 +238,13 @@ using make_unsigned = make_unsigned_selector<T>;
 export template <typename T>
 using make_unsigned_t = make_unsigned<T>::type;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp
 
-namespace aty::gatk::big_integer {
+namespace aatk::big_integer {
 
 }
 
-export namespace aty::gatk::tmp {
+export namespace aatk::tmp {
 
 template <typename>
 struct is_no_cv_big_integer : std::false_type
@@ -274,9 +274,9 @@ concept integral = signed_integral<T> || fixed_width_unsigned_integral<T>;
 template <typename T>
 concept nonbool_integral = integral<T> && !boolean<T>;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp
 
-namespace aty::gatk::tmp {
+namespace aatk::tmp {
 
 template <typename T, usize = (sizeof(T) < sizeof(i32) ? 0 : sizeof(T))>
 struct make_larger_width_selector_for_standard;
@@ -341,4 +341,4 @@ using make_larger_width = std::conditional_t<sizeof(T) <= sizeof(i64), make_larg
 export template <typename T>
 using make_larger_width_t = make_larger_width<T>::type;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp

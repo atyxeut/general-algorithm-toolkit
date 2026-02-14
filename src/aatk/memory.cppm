@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.memory;
+export module aatk.memory;
 
-namespace aty::gatk::memory {
+export namespace aatk::memory {
 
-export struct std_allocator_tag
+struct std_allocator_tag
 {
 };
 
-} // namespace aty::gatk::memory
+struct std_pmr_allocator_tag
+{
+};
+
+} // namespace aatk::memory

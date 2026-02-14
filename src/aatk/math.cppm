@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.data_structure;
+export module aatk.math;
 
-export import aty.gatk.data_structure.graph;
+export import aatk.math.floating_point;
+export import aatk.math.integer;
+
+export namespace aatk::tmp {
+
+template <typename T>
+concept arithmetic = integral<T> || floating_point<T>;
+
+} // namespace aatk::tmp

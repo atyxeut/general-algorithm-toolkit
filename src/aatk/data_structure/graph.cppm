@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.data_structure.graph;
+export module aatk.data_structure.graph;
 
 import std;
 
-import aty.gatk.math;
+import aatk.math;
 
-namespace aty::gatk::graph {
+namespace aatk::graph {
 
 template <typename>
 struct weight;
@@ -78,4 +78,4 @@ public:
   }
 };
 
-} // namespace aty::gatk::graph
+} // namespace aatk::graph

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.debug.benchmark;
+export module aatk.debug.benchmark;
 
 import std;
 
-import aty.gatk.util.stl_helper;
+import aatk.util.stl_helper;
 
-namespace aty::gatk::benchmark {
+namespace aatk::benchmark {
 
 export template <typename TRep, typename TRatio = std::milli, typename TDuration>
   requires tmp::is_std_duration_v<TDuration>
@@ -152,4 +152,4 @@ public:
   void print_laps() const { print_laps(1, lap_count()); }
 };
 
-} // namespace aty::gatk::benchmark
+} // namespace aatk::benchmark

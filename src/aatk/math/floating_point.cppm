@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export module aty.gatk.math.floating_point;
+export module aatk.math.floating_point;
 
 import std;
 
-import aty.gatk.math.integer;
-import aty.gatk.util.tmp;
+import aatk.math.integer;
+import aatk.util.tmp;
 
 // clang-format off
 export {
@@ -29,7 +29,7 @@ using f80 = long double; // precision: 18 to 20 decimal places (to gcc)
 }
 // clang-format on
 
-export namespace aty::gatk {
+export namespace aatk {
 
 namespace ieee754_float {
 
@@ -91,17 +91,17 @@ constexpr bool is_custom_ieee754_decimal_floating_point_v = is_custom_ieee754_de
 
 } // namespace tmp
 
-} // namespace aty::gatk
+} // namespace aatk
 
 // f128 precision: 33 to 35 decimal places
 #ifdef __SIZEOF_FLOAT128__
 // https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html
 export __extension__ using f128 = __float128;
 #else
-export using f128 = ::aty::gatk::ieee754_float::f<128>;
+export using f128 = ::aatk::ieee754_float::f<128>;
 #endif
 
-export namespace aty::gatk::tmp {
+export namespace aatk::tmp {
 
 template <typename T>
 concept ieee754_binary_floating_point = std::floating_point<T> || std::same_as<std::remove_cv_t<T>, f128> || is_custom_ieee754_binary_floating_point_v<T>;
@@ -112,13 +112,13 @@ concept ieee754_decimal_floating_point = is_custom_ieee754_decimal_floating_poin
 template <typename T>
 concept ieee754_floating_point = ieee754_binary_floating_point<T> || ieee754_decimal_floating_point<T>;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp
 
-namespace aty::gatk::big_decimal {
+namespace aatk::big_decimal {
 
 }
 
-export namespace aty::gatk::tmp {
+export namespace aatk::tmp {
 
 template <typename>
 struct is_no_cv_big_decimal : std::false_type
@@ -142,9 +142,9 @@ constexpr bool is_big_decimal_v = is_big_decimal<T>::value;
 template <typename T>
 concept floating_point = ieee754_floating_point<T> || is_big_decimal_v<T>;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp
 
-namespace aty::gatk::tmp {
+namespace aatk::tmp {
 
 template <typename T, typename = std::remove_cv_t<T>, bool = is_big_decimal_v<T>>
 struct make_higher_precision_selector;
@@ -200,4 +200,4 @@ using make_higher_precision = make_higher_precision_selector<T>;
 export template <typename T>
 using make_higher_precision_t = make_higher_precision<T>::type;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp

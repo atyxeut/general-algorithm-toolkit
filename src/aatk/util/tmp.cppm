@@ -13,11 +13,11 @@
 // limitations under the License.
 
 // general template metaprogramming utilities
-export module aty.gatk.util.tmp;
+export module aatk.util.tmp;
 
 import std;
 
-export namespace aty::gatk::tmp {
+export namespace aatk::tmp {
 
 template <typename TTypeList>
 struct front;
@@ -128,9 +128,9 @@ struct concat<std::tuple<TsL...>, std::tuple<TsR...>>
 template <typename TTypeListL, typename TTypeListR>
 using concat_t = concat<TTypeListL, TTypeListR>::type;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp
 
-namespace aty::gatk::tmp {
+namespace aatk::tmp {
 
 template <typename TFrom, typename TTo, bool = std::is_const_v<TFrom>, bool = std::is_volatile_v<TFrom>>
 struct claim_cv_selector;
@@ -176,4 +176,4 @@ concept no_cvref_same_as = std::same_as<std::remove_cvref_t<T>, std::remove_cvre
 export template <typename T, typename U>
 concept no_cvref_not_same_as = !no_cvref_same_as<T, U>;
 
-} // namespace aty::gatk::tmp
+} // namespace aatk::tmp
