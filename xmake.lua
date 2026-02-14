@@ -42,3 +42,4 @@ if get_config("toolchain") == "gcc" and is_host("windows") then
 end
 
 includes("src")
+includes("test")
