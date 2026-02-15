@@ -48,6 +48,22 @@ export namespace aatk {
 namespace meta {
 
 template <typename T>
+struct is_no_cv_boolean : std::is_same<T, bool>
+{
+};
+
+template <typename T>
+constexpr bool is_no_cv_boolean_v = is_no_cv_boolean<T>::value;
+
+template <typename T>
+struct is_boolean : is_no_cv_boolean<std::remove_cv_t<T>>
+{
+};
+
+template <typename T>
+constexpr bool is_boolean_v = is_boolean<T>::value;
+
+template <typename T>
 concept boolean = std::same_as<std::remove_cv_t<T>, bool>;
 
 template <typename T>

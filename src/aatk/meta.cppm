@@ -17,212 +17,23 @@ export module aatk.meta;
 
 import std;
 
-export namespace aatk::meta {
-
-template <typename... Ts>
-using type_list = std::tuple<Ts...>;
-
-template <typename>
-struct is_no_cv_type_list : std::false_type
-{
-};
-
-template <typename... Ts>
-struct is_no_cv_type_list<type_list<Ts...>> : std::true_type
-{
-};
-
-template <typename T>
-constexpr bool is_no_cv_type_list_v = is_no_cv_type_list<T>::value;
-
-template <typename T>
-using is_type_list = is_no_cv_type_list<std::remove_cv_t<T>>;
-
-template <typename T>
-constexpr bool is_type_list_v = is_type_list<T>::value;
-
-template <typename T>
-concept list_of_types = is_type_list_v<T>;
-
-template <typename T>
-struct is_no_cv_empty_type_list : std::false_type
-{
-};
-
-template <>
-struct is_no_cv_empty_type_list<type_list<>> : std::true_type
-{
-};
-
-template <typename T>
-constexpr bool is_no_cv_empty_type_list_v = is_no_cv_empty_type_list<T>::value;
-
-template <typename T>
-using is_empty_type_list = is_no_cv_empty_type_list<std::remove_cv_t<T>>;
-
-template <typename T>
-constexpr bool is_empty_type_list_v = is_empty_type_list<T>::value;
-
-// behave like Haskell List length
-template <list_of_types T>
-using length = std::tuple_size<T>;
-
-template <list_of_types T>
-constexpr std::size_t length_v = length<T>::value;
-
-// behave like Haskell List head
-template <list_of_types>
-struct head;
-
-template <>
-struct head<type_list<>>;
-
-template <typename T, typename... Ts>
-struct head<type_list<T, Ts...>>
-{
-  using type = T;
-};
-
-template <list_of_types T>
-using head_t = head<T>::type;
-
-template <std::size_t Idx, list_of_types T>
-  requires (Idx < length_v<T>)
-struct nth;
-
-template <std::size_t Idx, typename... Ts>
-struct nth<Idx, type_list<Ts...>>
-{
-  using type = Ts...[Idx];
-};
-
-template <std::size_t Idx, list_of_types T>
-using nth_t = nth<Idx, T>::type;
-
-// behave like Haskell List last
-template <list_of_types T>
-struct last
-{
-  using type = nth_t<length_v<T> - 1, T>;
-};
-
-template <>
-struct last<type_list<>>;
-
-template <list_of_types T>
-using last_t = last<T>::type;
-
-// behave like Haskell List : operator (1 : [1, 2] --> [1, 1, 2])
-template <typename, list_of_types>
-struct cons;
-
-template <typename T, typename... Ts>
-struct cons<T, type_list<Ts...>>
-{
-  using type = type_list<T, Ts...>;
-};
-
-template <typename T, list_of_types U>
-using cons_t = cons<T, U>::type;
-
-// behave like Haskell Seq |> operator (fromList [1, 2] |> 3 --> fromList [1, 2, 3])
-template <typename, list_of_types>
-struct snoc;
-
-template <typename T, typename... Ts>
-struct snoc<T, type_list<Ts...>>
-{
-  using type = type_list<Ts..., T>;
-};
-
-template <typename T, list_of_types U>
-using snoc_t = snoc<T, U>::type;
-
-// behave like Haskell List concat
-template <list_of_types...>
-struct concat;
-
-template <typename... Ts>
-struct concat<type_list<Ts...>>
-{
-  using type = type_list<Ts...>;
-};
-
-template <typename... TsOfLeft, typename... TsOfRight>
-struct concat<type_list<TsOfLeft...>, type_list<TsOfRight...>>
-{
-  using type = type_list<TsOfLeft..., TsOfRight...>;
-};
-
-template <list_of_types T0, list_of_types T1, list_of_types... Ts>
-struct concat<T0, T1, Ts...>
-{
-  using type = concat<typename concat<T0, T1>::type, Ts...>::type;
-};
-
-template <list_of_types... Ts>
-using concat_t = concat<Ts...>::type;
-
-// behave like Haskell List reverse
-template <list_of_types>
-struct reverse;
-
-template <>
-struct reverse<type_list<>>
-{
-  using type = type_list<>;
-};
-
-template <typename T, typename... Ts>
-struct reverse<type_list<T, Ts...>>
-{
-  using type = snoc_t<T, typename reverse<type_list<Ts...>>::type>;
-};
-
-template <list_of_types T>
-using reverse_t = reverse<T>::type;
-
-// behave like Haskell List tail
-template <list_of_types>
-struct tail;
-
-template <>
-struct tail<type_list<>>;
-
-template <typename T, typename... Ts>
-struct tail<type_list<T, Ts...>>
-{
-  using type = type_list<Ts...>;
-};
-
-template <list_of_types T>
-using tail_t = tail<T>::type;
-
-// behave like Haskell List init
-template <list_of_types>
-struct init;
-
-template <>
-struct init<type_list<>>;
-
-template <typename T>
-struct init<type_list<T>>
-{
-  using type = type_list<>;
-};
-
-template <typename T, typename... Ts>
-struct init<type_list<T, Ts...>>
-{
-  using type = cons_t<T, typename init<type_list<Ts...>>::type>;
-};
-
-template <list_of_types T>
-using init_t = init<T>::type;
-
-} // namespace aatk::meta
-
 namespace aatk::meta {
+
+export template <typename T>
+struct has_cv : std::bool_constant<std::is_const_v<T> || std::is_volatile_v<T>>
+{
+};
+
+export template <typename T>
+constexpr bool has_cv_v = has_cv<T>::value;
+
+export template <typename T>
+struct is_cv : std::bool_constant<std::is_const_v<T> && std::is_volatile_v<T>>
+{
+};
+
+export template <typename T>
+constexpr bool is_cv_v = is_cv<T>::value;
 
 template <typename TFrom, typename TTo, bool = std::is_const_v<TFrom>, bool = std::is_volatile_v<TFrom>>
 struct claim_cv_selector;
@@ -267,5 +78,476 @@ concept no_cvref_same_as = std::same_as<std::remove_cvref_t<T>, std::remove_cvre
 
 export template <typename T, typename U>
 concept no_cvref_not_same_as = !no_cvref_same_as<T, U>;
+
+} // namespace aatk::meta
+
+namespace aatk::meta {
+
+export template <std::size_t N>
+using index_constant = std::integral_constant<std::size_t, N>;
+
+export template <typename, typename... Us>
+  requires (sizeof...(Us) > 0)
+struct is_none_of;
+
+export template <typename T, typename U>
+struct is_none_of<T, U> : std::bool_constant<!std::same_as<T, U>>
+{
+};
+
+export template <typename T, typename U, typename... Us>
+struct is_none_of<T, U, Us...> : std::bool_constant<is_none_of<T, U>::value && is_none_of<T, Us...>::value>
+{
+};
+
+export template <typename T, typename... Us>
+constexpr bool is_none_of_v = is_none_of<T, Us...>::value;
+
+export template <typename T, typename... Us>
+  requires (sizeof...(Us) > 0)
+struct is_any_of : std::negation<is_none_of<T, Us...>>
+{
+};
+
+export template <typename T, typename... Us>
+constexpr bool is_any_of_v = is_any_of<T, Us...>::value;
+
+export template <typename...>
+struct all_the_same;
+
+export template <>
+struct all_the_same<> : std::true_type
+{
+};
+
+export template <typename T0, typename T1>
+struct all_the_same<T0, T1> : std::bool_constant<std::same_as<T0, T1>>
+{
+};
+
+export template <typename T0, typename T1, typename... Ts>
+struct all_the_same<T0, T1, Ts...> : std::bool_constant<all_the_same<T0, T1>::value && all_the_same<T1, Ts...>::value>
+{
+};
+
+export template <typename... Ts>
+constexpr bool all_the_same_v = all_the_same<Ts...>::value;
+
+// clang-format off
+export template <template <typename, typename...> typename TT>
+struct is_predicate : std::bool_constant<requires { { TT<void, void>::value } -> no_cvref_same_as<bool>; } || requires { { TT<void>::value } -> no_cvref_same_as<bool>; }>
+{
+};
+// clang-format on
+
+export template <template <typename, typename...> typename TT>
+constexpr bool is_predicate_v = is_predicate<TT>::value;
+
+export template <template <typename, typename...> typename TT>
+concept predicate = is_predicate_v<TT>;
+
+} // namespace aatk::meta
+
+// type list and its helpers
+namespace aatk::meta {
+
+export template <typename... Ts>
+using type_list = std::tuple<Ts...>;
+
+export using empty_type_list = type_list<>;
+
+export template <typename>
+struct is_no_cv_type_list : std::false_type
+{
+};
+
+export template <typename... Ts>
+struct is_no_cv_type_list<type_list<Ts...>> : std::true_type
+{
+};
+
+export template <typename T>
+constexpr bool is_no_cv_type_list_v = is_no_cv_type_list<T>::value;
+
+export template <typename T>
+using is_type_list = is_no_cv_type_list<std::remove_cv_t<T>>;
+
+export template <typename T>
+constexpr bool is_type_list_v = is_type_list<T>::value;
+
+export template <typename T>
+concept list_of_types = is_type_list_v<T>;
+
+export template <typename T>
+struct is_no_cv_empty_type_list : std::false_type
+{
+};
+
+export template <>
+struct is_no_cv_empty_type_list<empty_type_list> : std::true_type
+{
+};
+
+export template <typename T>
+constexpr bool is_no_cv_empty_type_list_v = is_no_cv_empty_type_list<T>::value;
+
+export template <typename T>
+using is_empty_type_list = is_no_cv_empty_type_list<std::remove_cv_t<T>>;
+
+export template <typename T>
+constexpr bool is_empty_type_list_v = is_empty_type_list<T>::value;
+
+export template <typename, list_of_types>
+struct has_none;
+
+export template <typename T>
+struct has_none<T, empty_type_list> : std::true_type
+{
+};
+
+export template <typename T, typename... Us>
+struct has_none<T, type_list<Us...>> : is_none_of<T, Us...>
+{
+};
+
+export template <typename T, list_of_types U>
+constexpr bool has_none_v = has_none<T, U>::value;
+
+export template <typename T, list_of_types U>
+using has_any = std::negation<has_none<T, U>>;
+
+export template <typename T, list_of_types U>
+constexpr bool has_any_v = has_any<T, U>::value;
+
+// behave like Haskell List length: get the length of a type list
+// O(1) time complexity (assuming sizeof...(Ts) has O(1) time complexity)
+export template <list_of_types>
+struct length;
+
+export template <typename... Ts>
+struct length<type_list<Ts...>> : index_constant<sizeof...(Ts)>
+{
+};
+
+export template <list_of_types T>
+constexpr std::size_t length_v = length<T>::value;
+
+// get the nth type of a type list, index starts at 0
+// O(1) time complexity (assuming C++26 pack indexing has O(1) time complexity)
+export template <std::size_t Idx, list_of_types T>
+  requires (Idx < length_v<T>)
+struct nth;
+
+export template <std::size_t Idx>
+struct nth<Idx, type_list<>>;
+
+export template <std::size_t Idx, typename... Ts>
+struct nth<Idx, type_list<Ts...>>
+{
+  using type = Ts...[Idx];
+};
+
+export template <std::size_t Idx, list_of_types T>
+using nth_t = nth<Idx, T>::type;
+
+// behave like Haskell List head: get the first type of a type list
+// O(1) time complexity
+export template <list_of_types T>
+using head = nth<0, T>;
+
+export template <list_of_types T>
+using head_t = head<T>::type;
+
+// behave like Haskell List last: get the last type of a type list
+// O(1) time complexity
+export template <list_of_types T>
+using last = nth<length_v<T> - 1, T>;
+
+export template <list_of_types T>
+using last_t = last<T>::type;
+
+// behave like Haskell List : operator (1 : [1, 2] --> [1, 1, 2]): get a type list that has one element added to the beginning comparing to the given type list
+// O(1) time complexity
+export template <typename, list_of_types>
+struct cons;
+
+export template <typename T, typename... Ts>
+struct cons<T, type_list<Ts...>>
+{
+  using type = type_list<T, Ts...>;
+};
+
+export template <typename T, list_of_types U>
+using cons_t = cons<T, U>::type;
+
+// behave like Haskell Seq |> operator (fromList [1, 2] |> 3 --> fromList [1, 2, 3]): get a type list that has one element added to the end comparing to the given type list
+// O(1) time complexity
+export template <typename, list_of_types>
+struct snoc;
+
+export template <typename T, typename... Ts>
+struct snoc<T, type_list<Ts...>>
+{
+  using type = type_list<Ts..., T>;
+};
+
+export template <typename T, list_of_types U>
+using snoc_t = snoc<T, U>::type;
+
+// behave like Haskell List concat: get the concatenation of several type lists
+// O(n) time complexity, where n is the count of type lists to concatenate
+export template <list_of_types...>
+struct concat;
+
+export template <typename... Ts>
+struct concat<type_list<Ts...>>
+{
+  using type = type_list<Ts...>;
+};
+
+export template <typename... TsOfLeft, typename... TsOfRight>
+struct concat<type_list<TsOfLeft...>, type_list<TsOfRight...>>
+{
+  using type = type_list<TsOfLeft..., TsOfRight...>;
+};
+
+export template <list_of_types T0, list_of_types T1, list_of_types... Ts>
+struct concat<T0, T1, Ts...> : concat<typename concat<T0, T1>::type, Ts...>
+{
+};
+
+export template <list_of_types... Ts>
+using concat_t = concat<Ts...>::type;
+
+// behave like Haskell List reverse: get a type list that is the reverse of the given type list
+// O(n) time complexity, where n is the length of the given type list
+export template <list_of_types>
+struct reverse;
+
+export template <>
+struct reverse<empty_type_list>
+{
+  using type = empty_type_list;
+};
+
+export template <typename T, typename... Ts>
+struct reverse<type_list<T, Ts...>> : snoc<T, typename reverse<type_list<Ts...>>::type>
+{
+};
+
+export template <list_of_types T>
+using reverse_t = reverse<T>::type;
+
+// behave like Haskell List tail: get a type list with the first type removed comparing to the given type list
+// O(1) time complexity
+export template <list_of_types>
+struct tail;
+
+export template <>
+struct tail<empty_type_list>;
+
+export template <typename T, typename... Ts>
+struct tail<type_list<T, Ts...>>
+{
+  using type = type_list<Ts...>;
+};
+
+export template <list_of_types T>
+using tail_t = tail<T>::type;
+
+// behave like Haskell List init: get a type list with the last type removed comparing to the given type list
+// O(n) time complexity, where n is the length of the given type list
+export template <list_of_types>
+struct init;
+
+export template <>
+struct init<empty_type_list>;
+
+export template <typename T>
+struct init<type_list<T>>
+{
+  using type = empty_type_list;
+};
+
+export template <typename T, typename... Ts>
+struct init<type_list<T, Ts...>> : cons<T, typename init<type_list<Ts...>>::type>
+{
+};
+
+export template <list_of_types T>
+using init_t = init<T>::type;
+
+// behave like Haskell repeat: get a type list that contains N identical types
+// O(N) time complexity
+export template <std::size_t N, typename T>
+struct repeat : cons<T, typename repeat<N - 1, T>::type>
+{
+};
+
+export template <typename T>
+struct repeat<0, T>
+{
+  using type = empty_type_list;
+};
+
+export template <std::size_t N, typename T>
+using repeat_t = repeat<N, T>::type;
+
+// behave like Haskell List take: get a type list that contains the first N types of the given type list
+// O(N) time complexity
+export template <std::size_t N, list_of_types T>
+  requires (N <= length_v<T>)
+struct take : cons<head_t<T>, typename take<N - 1, tail_t<T>>::type>
+{
+};
+
+export template <list_of_types T>
+struct take<0, T>
+{
+  using type = empty_type_list;
+};
+
+export template <std::size_t N, list_of_types T>
+using take_t = take<N, T>::type;
+
+template <std::size_t N, list_of_types T>
+struct take_end_impl : take_end_impl<N - 1, tail_t<T>>
+{
+};
+
+template <list_of_types T>
+struct take_end_impl<0, T>
+{
+  using type = T;
+};
+
+// same as take, but take from the end
+// O(length - N) time complexity
+export template <std::size_t N, list_of_types T>
+  requires (N <= length_v<T>)
+struct take_end : take_end_impl<length_v<T> - N, T>
+{
+};
+
+export template <std::size_t N, list_of_types T>
+using take_end_t = take_end<N, T>::type;
+
+// behave like Haskell List takeWhile: get the longest prefix type list whose types all satisfy a given predicate
+// O(n) time complexity, where n is the length of the longest prefix
+export template <template <typename> typename TTPred, list_of_types>
+  requires predicate<TTPred>
+struct take_while;
+
+export template <template <typename> typename TTPred>
+struct take_while<TTPred, empty_type_list>
+{
+  using type = empty_type_list;
+};
+
+export template <template <typename> typename TTPred, typename T, typename... Ts>
+struct take_while<TTPred, type_list<T, Ts...>> : std::conditional<TTPred<T>::value, concat_t<type_list<T>, typename take_while<TTPred, type_list<Ts...>>::type>, empty_type_list>
+{
+};
+
+export template <template <typename> typename TTPred, list_of_types T>
+using take_while_t = take_while<TTPred, T>::type;
+
+// get the longest suffix type list whose types all satisfy a given predicate
+// O(n) time complexity, where n is the length of the given type list
+export template <template <typename> typename TTPred, list_of_types T>
+  requires predicate<TTPred>
+struct take_while_end : reverse<take_while_t<TTPred, reverse_t<T>>>
+{
+};
+
+export template <template <typename> typename TTPred, list_of_types T>
+using take_while_end_t = take_while_end<TTPred, T>::type;
+
+// behave like Haskell List drop: get a type list with the first N types removed comparing to the given type list
+// O(N) time complexity
+export template <std::size_t N, list_of_types T>
+  requires (N <= length_v<T>)
+struct drop : drop<N - 1, tail_t<T>>
+{
+};
+
+export template <list_of_types T>
+struct drop<0, T>
+{
+  using type = T;
+};
+
+export template <std::size_t N, list_of_types T>
+using drop_t = drop<N, T>::type;
+
+template <std::size_t N, list_of_types T>
+struct drop_end_impl : cons<head_t<T>, typename drop_end_impl<N - 1, tail_t<T>>::type>
+{
+};
+
+template <list_of_types T>
+struct drop_end_impl<0, T>
+{
+  using type = empty_type_list;
+};
+
+// same as drop, but drop from the end
+// O(length - N) time complexity
+export template <std::size_t N, list_of_types T>
+  requires (N <= length_v<T>)
+struct drop_end : drop_end_impl<length_v<T> - N, T>
+{
+};
+
+export template <std::size_t N, list_of_types T>
+using drop_end_t = drop_end<N, T>::type;
+
+// behave like Haskell List dropWhile: get a type list with a longest prefix type list removed, whose types all satisfy a given predicate
+// O(n) time complexity, where n is the count of types dropped
+export template <template <typename> typename TTPred, list_of_types T>
+  requires predicate<TTPred>
+struct drop_while : std::conditional<TTPred<head_t<T>>::value, typename drop_while<TTPred, tail_t<T>>::type, T>
+{
+};
+
+export template <template <typename> typename TTPred>
+struct drop_while<TTPred, empty_type_list>
+{
+  using type = empty_type_list;
+};
+
+export template <template <typename> typename TTPred, list_of_types T>
+using drop_while_t = drop_while<TTPred, T>::type;
+
+// behave like Haskell List dropWhileEnd: get a type list with a longest suffix type list removed, whose types all satisfy a given predicate
+// O(n) time complexity, where n is the length of the given type list
+export template <template <typename> typename TTPred, list_of_types T>
+  requires predicate<TTPred>
+struct drop_while_end : reverse<drop_while_t<TTPred, reverse_t<T>>>
+{
+};
+
+export template <template <typename> typename TTPred, list_of_types T>
+using drop_while_end_t = drop_while_end<TTPred, T>::type;
+
+// behave like Haskell List filter: get a type list that contains all the types that satisfy a given predicate
+// O(n) time complexity, where n is the length of the given type list
+export template <template <typename> typename TTPred, list_of_types>
+  requires predicate<TTPred>
+struct filter;
+
+export template <template <typename> typename TTPred>
+struct filter<TTPred, empty_type_list>
+{
+  using type = empty_type_list;
+};
+
+export template <template <typename> typename TTPred, typename T, typename... Ts>
+struct filter<TTPred, type_list<T, Ts...>> : concat<std::conditional_t<TTPred<T>::value, type_list<T>, empty_type_list>, typename filter<TTPred, type_list<Ts...>>::type>
+{
+};
+
+export template <template <typename> typename TTPred, list_of_types T>
+using filter_t = filter<TTPred, T>::type;
 
 } // namespace aatk::meta
