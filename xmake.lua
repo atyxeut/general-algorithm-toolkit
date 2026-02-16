@@ -28,14 +28,14 @@ if is_host("windows") then
   set_config("plat", "mingw")
 end
 
--- recommended llvm binary: https://github.com/mstorsjo/llvm-mingw
+-- recommend llvm binary: https://github.com/mstorsjo/llvm-mingw
 if get_config("toolchain") == "llvm" and is_host("macosx") then
   set_policy("build.c++.modules", true)
   -- binary from Homebrew: brew install llvm
   add_ldflags("-L/usr/local/opt/llvm@21/lib/c++")
 end
 
--- recommended gcc binary: https://gcc-mcf.lhmouse.com/
+-- recommend gcc binary: https://gcc-mcf.lhmouse.com/
 if get_config("toolchain") == "gcc" and is_host("windows") then
   -- gcc 16 still requires this on Windows
   add_syslinks("stdc++exp")
