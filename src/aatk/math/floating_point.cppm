@@ -150,39 +150,33 @@ template <typename T, typename = std::remove_cv_t<T>, bool = is_big_decimal_v<T>
 struct make_higher_precision_selector;
 
 template <typename T>
-struct make_higher_precision_selector<T, f32, false>
+struct make_higher_precision_selector<T, f32, false> : claim_cv<T, f64>
 {
-  using type = claim_cv_t<T, f64>;
 };
 
 template <typename T>
-struct make_higher_precision_selector<T, f64, false>
+struct make_higher_precision_selector<T, f64, false> : claim_cv<T, f80>
 {
-  using type = claim_cv_t<T, f80>;
 };
 
 template <typename T>
-struct make_higher_precision_selector<T, f80, false>
+struct make_higher_precision_selector<T, f80, false> : claim_cv<T, f128>
 {
-  using type = claim_cv_t<T, f128>;
 };
 
 template <typename T>
-struct make_higher_precision_selector<T, f128, false>
+struct make_higher_precision_selector<T, f128, false> : claim_cv<T, ieee754_float::f<256>>
 {
-  using type = claim_cv_t<T, ieee754_float::f<256>>;
 };
 
 template <typename T, usize PrecisionBits>
-struct make_higher_precision_selector<T, ieee754_float::f<PrecisionBits>, false>
+struct make_higher_precision_selector<T, ieee754_float::f<PrecisionBits>, false> : claim_cv<T, ieee754_float::f<PrecisionBits * 2>>
 {
-  using type = claim_cv_t<T, ieee754_float::f<PrecisionBits * 2>>;
 };
 
 template <typename T, usize PrecisionBits>
-struct make_higher_precision_selector<T, ieee754_float::d<PrecisionBits>, false>
+struct make_higher_precision_selector<T, ieee754_float::d<PrecisionBits>, false> : claim_cv<T, ieee754_float::d<PrecisionBits * 2>>
 {
-  using type = claim_cv_t<T, ieee754_float::d<PrecisionBits * 2>>;
 };
 
 template <typename T>

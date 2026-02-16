@@ -89,14 +89,10 @@ export template <typename TElem, std::size_t... Dims, typename T>
   return arr;
 }
 
-template <meta::list_of_types, std::size_t DimCnt>
-struct adjust_allocator_type_list;
-
-template <typename... TCurAllocators, std::size_t DimCnt>
-struct adjust_allocator_type_list<meta::type_list<TCurAllocators...>, DimCnt>
+// use std::allocator as a default allocator
+template <meta::list_of_types TCurAllocatorList, std::size_t DimCnt>
+struct adjust_allocator_type_list : meta::concat<TCurAllocatorList, std::conditional_t<(meta::length_v<TCurAllocatorList>) < DimCnt, meta::type_list<memory::std_allocator_tag>, meta::type_list<>>>
 {
-  // use std::allocator as a default allocator
-  using type = meta::concat_t<meta::type_list<TCurAllocators...>, std::conditional_t<sizeof...(TCurAllocators) < DimCnt, meta::type_list<memory::std_allocator_tag>, meta::type_list<>>>;
 };
 
 template <meta::list_of_types TCurAllocatorList, std::size_t DimCnt>
@@ -104,24 +100,21 @@ using adjust_allocator_type_list_t = adjust_allocator_type_list<TCurAllocatorLis
 
 template <typename TElement, meta::list_of_types TAllocatorList, typename TLastAllocator = meta::last_t<TAllocatorList>>
   requires (meta::length_v<TAllocatorList> != 0)
-struct cur_dim_allocator;
+struct cur_dim_allocator
+{
+  using type = TLastAllocator;
+};
 
-template <typename TElement, typename... TAllocators>
-struct cur_dim_allocator<TElement, meta::type_list<TAllocators...>, memory::std_allocator_tag>
+template <typename TElement, meta::list_of_types TAllocatorList>
+struct cur_dim_allocator<TElement, TAllocatorList, memory::std_allocator_tag>
 {
   using type = std::allocator<TElement>;
 };
 
-template <typename TElement, typename... TAllocators>
-struct cur_dim_allocator<TElement, meta::type_list<TAllocators...>, memory::std_pmr_allocator_tag>
+template <typename TElement, meta::list_of_types TAllocatorList>
+struct cur_dim_allocator<TElement, TAllocatorList, memory::std_pmr_allocator_tag>
 {
   using type = std::pmr::polymorphic_allocator<TElement>;
-};
-
-template <typename TElement, typename... TAllocators, typename TLastAllocator>
-struct cur_dim_allocator<TElement, meta::type_list<TAllocators...>, TLastAllocator>
-{
-  using type = TLastAllocator;
 };
 
 template <typename TElement, meta::list_of_types TAllocatorList>

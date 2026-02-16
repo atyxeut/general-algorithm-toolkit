@@ -40,23 +40,20 @@ struct claim_cv_selector;
 
 // branch 1: has both cv qualifiers
 template <typename TFrom, typename TTo>
-struct claim_cv_selector<TFrom, TTo, true, true>
+struct claim_cv_selector<TFrom, TTo, true, true> : std::add_cv<TTo>
 {
-  using type = std::add_cv_t<TTo>;
 };
 
 // branch 2: has only const qualifier
 template <typename TFrom, typename TTo>
-struct claim_cv_selector<TFrom, TTo, true, false>
+struct claim_cv_selector<TFrom, TTo, true, false> : std::add_const<TTo>
 {
-  using type = std::add_const_t<TTo>;
 };
 
 // branch 3: has only volatile qualifier
 template <typename TFrom, typename TTo>
-struct claim_cv_selector<TFrom, TTo, false, true>
+struct claim_cv_selector<TFrom, TTo, false, true> : std::add_volatile<TTo>
 {
-  using type = std::add_volatile_t<TTo>;
 };
 
 // branch 4: has no cv qualifiers
@@ -214,7 +211,9 @@ export template <typename T, list_of_types U>
 constexpr bool has_none_v = has_none<T, U>::value;
 
 export template <typename T, list_of_types U>
-using has_any = std::negation<has_none<T, U>>;
+struct has_any : std::negation<has_none<T, U>>
+{
+};
 
 export template <typename T, list_of_types U>
 constexpr bool has_any_v = has_any<T, U>::value;
