@@ -546,7 +546,7 @@ export template <template <typename> typename TTPred, list_of_types T>
 using drop_while_end_t = drop_while_end<TTPred, T>::type;
 
 // get a type list that contains all the types that satisfy a given predicate
-// O(n) time complexity, where n is the length of the given type list
+// O(1) time complexity (assuming pack expansion has O(1) time complexity)
 // name after Haskell Data.List filter
 export template <template <typename> typename TTPred, list_of_types>
   requires predicate<TTPred>
@@ -558,8 +558,8 @@ struct filter<TTPred, empty_type_list>
   using type = empty_type_list;
 };
 
-export template <template <typename> typename TTPred, typename T, typename... Ts>
-struct filter<TTPred, type_list<T, Ts...>> : concat<std::conditional_t<TTPred<T>::value, type_list<T>, empty_type_list>, typename filter<TTPred, type_list<Ts...>>::type>
+export template <template <typename> typename TTPred, typename... Ts>
+struct filter<TTPred, type_list<Ts...>> : concat<std::conditional_t<TTPred<Ts>::value, type_list<Ts>, empty_type_list>...>
 {
 };
 
