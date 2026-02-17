@@ -22,10 +22,10 @@ namespace test::aatk::meta {
 
 export consteval void does_meta_is_none_any_of_work() noexcept
 {
-  static_assert(::aatk::meta::is_none_of_v<int, double, long double, char, const char, float, std::string> == true);
+  static_assert(::aatk::meta::is_none_of_v<int, double, long double, char, const char, float, std::string, const int> == true);
   static_assert(::aatk::meta::is_none_of_v<int, double, long double, char, const char, int, std::string> == false);
 
-  static_assert(::aatk::meta::is_any_of_v<int, double, long double, char, const char, float, std::string> == false);
+  static_assert(::aatk::meta::is_any_of_v<int, double, long double, char, const char, float, std::string, const int> == false);
   static_assert(::aatk::meta::is_any_of_v<int, double, long double, char, const char, int, std::string> == true);
 }
 

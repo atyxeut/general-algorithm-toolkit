@@ -79,17 +79,14 @@ concept no_cvref_not_same_as = !no_cvref_same_as<T, U>;
 export template <std::size_t N>
 using index_constant = std::integral_constant<std::size_t, N>;
 
-export template <typename, typename... Us>
+export template <typename T, typename... Us>
   requires (sizeof...(Us) > 0)
-struct is_none_of;
-
-export template <typename T, typename U>
-struct is_none_of<T, U> : std::bool_constant<!std::same_as<T, U>>
+struct is_none_of : std::conjunction<is_none_of<T, Us>...>
 {
 };
 
-export template <typename T, typename U, typename... Us>
-struct is_none_of<T, U, Us...> : std::bool_constant<is_none_of<T, U>::value && is_none_of<T, Us...>::value>
+export template <typename T, typename U>
+struct is_none_of<T, U> : std::bool_constant<!std::same_as<T, U>>
 {
 };
 
