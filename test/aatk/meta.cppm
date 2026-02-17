@@ -114,6 +114,22 @@ export consteval void does_meta_reverse_work() noexcept
   static_assert(std::same_as<::aatk::meta::reverse_t<type_list_2>, reversed_type_list_of_2>);
 }
 
+export consteval void does_meta_init_work() noexcept
+{
+  // force a template substitution to make `requires` work
+  auto test_empty_list = []<typename T> consteval noexcept
+  {
+    return requires { typename ::aatk::meta::init_t<T>; };
+  };
+  static_assert(test_empty_list.operator ()<::aatk::meta::empty_type_list>() == false);
+
+  using init_type_list_of_1 = ::aatk::meta::type_list<double, float, std::vector<int>>;
+  static_assert(std::same_as<::aatk::meta::init_t<type_list_1>, init_type_list_of_1> == true);
+
+  using init_type_list_of_2 = ::aatk::meta::type_list<std::string, unsigned, const volatile bool>;
+  static_assert(std::same_as<::aatk::meta::init_t<type_list_2>, init_type_list_of_2> == true);
+}
+
 export consteval void does_meta_take_work() noexcept
 {
   using take_0_type_list = ::aatk::meta::empty_type_list;

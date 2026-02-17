@@ -88,12 +88,15 @@ struct make_reversed_integer_sequence_impl<std::integer_sequence<T, Is...>>
   using type = std::integer_sequence<T, (sizeof...(Is) - 1 - Is)...>;
 };
 
+// assume O(1) time complexity
 export template <std::integral T, T N>
 using make_reversed_integer_sequence = make_reversed_integer_sequence_impl<std::make_integer_sequence<T, N>>::type;
 
+// assume O(1) time complexity
 export template <std::size_t N>
 using make_reversed_index_sequence = make_reversed_integer_sequence_impl<std::make_integer_sequence<std::size_t, N>>::type;
 
+// assume O(1) time complexity
 export template <typename... Ts>
 using reversed_index_sequence_for = make_reversed_index_sequence<sizeof...(Ts)>;
 
@@ -107,11 +110,13 @@ struct make_integer_sequence_of_range_impl<T, Begin, std::integer_sequence<T, Is
 };
 
 // generate a sequence of integers of type T in [Begin, End]
+// assume O(1) time complexity
 export template <std::integral T, T Begin, T End>
   requires (Begin <= End)
 using make_integer_sequence_of_range = make_integer_sequence_of_range_impl<T, Begin, std::make_integer_sequence<T, End - Begin + 1>>::type;
 
 // generate a sequence of integers of type std::size_t in [Begin, End]
+// assume O(1) time complexity
 export template <std::size_t Begin, std::size_t End>
   requires (Begin <= End)
 using make_index_sequence_of_range = make_integer_sequence_of_range<std::size_t, Begin, End>;
@@ -126,11 +131,13 @@ struct make_reversed_integer_sequence_of_range_impl<T, End, std::integer_sequenc
 };
 
 // generate a sequence of integers of type T in [Begin, End] in a reversed order
+// assume O(1) time complexity
 export template <std::integral T, T Begin, T End>
   requires (Begin <= End)
 using make_reversed_integer_sequence_of_range = make_reversed_integer_sequence_of_range_impl<T, End, std::make_integer_sequence<T, End - Begin + 1>>::type;
 
 // generate a sequence of integers of type std::size_t in [Begin, End] in a reversed order
+// assume O(1) time complexity
 export template <std::size_t Begin, std::size_t End>
   requires (Begin <= End)
 using make_reversed_index_sequence_of_range = make_reversed_integer_sequence_of_range<std::size_t, Begin, End>;
@@ -279,7 +286,7 @@ export template <std::size_t Idx, list_of_types T>
 using nth_t = nth<Idx, T>::type;
 
 // get the first type of a type list
-// O(1) time complexity (assuming `nth` has O(1) time complexity)
+// O(1) time complexity
 // name after Haskell Data.List head
 export template <list_of_types T>
 using head = nth<0, T>;
@@ -288,7 +295,7 @@ export template <list_of_types T>
 using head_t = head<T>::type;
 
 // get the last type of a type list
-// O(1) time complexity (assuming `nth` has O(1) time complexity)
+// O(1) time complexity
 // name after Haskell Data.List last
 export template <list_of_types T>
 using last = nth<length_v<T> - 1, T>;
@@ -335,7 +342,7 @@ struct repeat_impl<T, std::index_sequence<Is...>>
 };
 
 // get a type list that contains N identical types
-// O(1) time complexity (assuming pack expansion and make `std::integer_sequence` both have O(1) time complexity)
+// O(1) time complexity
 // name after Haskell Data.List repeat
 export template <std::size_t N, typename T>
 struct repeat : repeat_impl<T, std::make_index_sequence<N>>
@@ -399,30 +406,32 @@ struct concat<T, Ts...> : concat_impl<0, 1 + sizeof...(Ts), type_list<T, Ts...>>
 export template <list_of_types... Ts>
 using concat_t = concat<Ts...>::type;
 
-template <typename TIndexSequence, typename... Ts>
-struct reverse_impl;
+// get a type list that contains types whose indices are in the given `std::index_sequence`
+// O(1) time complexity
+export template <typename TIndexSequence, list_of_types>
+struct select_by_index_sequence;
 
-template <std::size_t... Is, typename... Ts>
-struct reverse_impl<std::index_sequence<Is...>, Ts...>
+export template <std::size_t... Is, typename... Ts>
+struct select_by_index_sequence<std::index_sequence<Is...>, type_list<Ts...>>
 {
   using type = type_list<Ts...[Is]...>;
 };
 
+export template <typename TIndexSequence, list_of_types T>
+using select_by_index_sequence_t = select_by_index_sequence<TIndexSequence, T>::type;
+
 // get a type list that is the reverse of the given type list
-// O(1) time complexity (assuming pack expansion, C++26 pack indexing and making `std::index_sequence` all have O(1) time complexity)
+// O(1) time complexity
 // name after Haskell Data.List reverse
-export template <list_of_types>
-struct reverse;
+export template <list_of_types T>
+struct reverse : select_by_index_sequence<make_reversed_index_sequence<length_v<T>>, T>
+{
+};
 
 export template <>
 struct reverse<empty_type_list>
 {
   using type = empty_type_list;
-};
-
-export template <typename... Ts>
-struct reverse<type_list<Ts...>> : reverse_impl<make_reversed_index_sequence<sizeof...(Ts)>, Ts...>
-{
 };
 
 export template <list_of_types T>
@@ -447,24 +456,15 @@ export template <list_of_types T>
 using tail_t = tail<T>::type;
 
 // get a type list with the last type removed comparing to the given type list
-// O(n) time complexity, where n is the length of the given type list
+// O(1) time complexity
 // name after Haskell Data.List init
-export template <list_of_types>
-struct init;
+export template <list_of_types T>
+struct init : select_by_index_sequence<std::make_index_sequence<length_v<T> - 1>, T>
+{
+};
 
 export template <>
 struct init<empty_type_list>;
-
-export template <typename T>
-struct init<type_list<T>>
-{
-  using type = empty_type_list;
-};
-
-export template <typename T, typename... Ts>
-struct init<type_list<T, Ts...>> : cons<T, typename init<type_list<Ts...>>::type>
-{
-};
 
 export template <list_of_types T>
 using init_t = init<T>::type;
