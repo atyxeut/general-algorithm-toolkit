@@ -269,6 +269,32 @@ struct snoc<T, type_list<Ts...>>
 export template <typename T, list_of_types U>
 using snoc_t = snoc<T, U>::type;
 
+template <typename T, typename TIndexSequence>
+struct repeat_impl;
+
+template <typename T, std::size_t... Is>
+struct repeat_impl<T, std::index_sequence<Is...>>
+{
+  using type = type_list<std::enable_if_t<(Is >= 0), T>...>;
+};
+
+// get a type list that contains N identical types
+// O(1) time complexity (assuming pack expansion has O(1) time complexity)
+// name after Haskell Data.List repeat
+export template <std::size_t N, typename T>
+struct repeat : repeat_impl<T, std::make_index_sequence<N>>
+{
+};
+
+export template <typename T>
+struct repeat<0, T>
+{
+  using type = empty_type_list;
+};
+
+export template <std::size_t N, typename T>
+using repeat_t = repeat<N, T>::type;
+
 // get the concatenation of several type lists
 // O(log n) time complexity, where n is the count of type lists to concatenate
 // name after Haskell Data.List concat
@@ -378,23 +404,6 @@ struct init<type_list<T, Ts...>> : cons<T, typename init<type_list<Ts...>>::type
 
 export template <list_of_types T>
 using init_t = init<T>::type;
-
-// get a type list that contains N identical types
-// O(N) time complexity
-// name after Haskell Data.List repeat
-export template <std::size_t N, typename T>
-struct repeat : cons<T, typename repeat<N - 1, T>::type>
-{
-};
-
-export template <typename T>
-struct repeat<0, T>
-{
-  using type = empty_type_list;
-};
-
-export template <std::size_t N, typename T>
-using repeat_t = repeat<N, T>::type;
 
 // get a type list that contains the first N types of the given type list
 // O(N) time complexity

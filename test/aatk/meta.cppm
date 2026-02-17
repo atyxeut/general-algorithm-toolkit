@@ -51,6 +51,15 @@ export consteval void does_meta_has_none_any_work() noexcept
   static_assert(::aatk::meta::has_any_v<int, type_list_2> == false);
 }
 
+export consteval void does_meta_repeat_work() noexcept
+{
+  using repeated_0_time_type_list = ::aatk::meta::empty_type_list;
+  static_assert(std::same_as<::aatk::meta::repeat_t<0, void>, repeated_0_time_type_list>);
+
+  using int_repeated_5_times_type_list = ::aatk::meta::type_list<int, int, int, int, int>;
+  static_assert(std::same_as<::aatk::meta::repeat_t<5, int>, int_repeated_5_times_type_list>);
+}
+
 export consteval void does_meta_concat_work() noexcept
 {
   static_assert(std::same_as<::aatk::meta::concat_t<type_list_1>, type_list_1>);
@@ -64,6 +73,10 @@ export consteval void does_meta_concat_work() noexcept
 
   using concatenation_of_1_2_3_4 = ::aatk::meta::type_list<double, float, std::vector<int>, long long, std::string, unsigned, const volatile bool, bool, int, char, const int, volatile char, int, int, int, int, int, int, int>;
   static_assert(std::same_as<::aatk::meta::concat_t<type_list_1, type_list_2, type_list_3, type_list_4>, concatenation_of_1_2_3_4>);
+
+  // test `repeat` complexity, length_v<type_list_4> * 1500 recursion depth (for a O(N) recursive implementation) will make the compiler crash by default
+  using huge_concatenation_before = ::aatk::meta::repeat_t<1500, type_list_4>;
+  using huge_concatenation_after = ::aatk::meta::repeat_t<::aatk::meta::length_v<type_list_4> * 1500, int>;
 }
 
 export consteval void does_meta_reverse_work() noexcept
@@ -73,15 +86,6 @@ export consteval void does_meta_reverse_work() noexcept
 
   using reversed_type_list_of_2 = ::aatk::meta::type_list<bool, const volatile bool, unsigned, std::string>;
   static_assert(std::same_as<::aatk::meta::reverse_t<type_list_2>, reversed_type_list_of_2>);
-}
-
-export consteval void does_meta_repeat_work() noexcept
-{
-  using repeated_0_time_type_list = ::aatk::meta::empty_type_list;
-  static_assert(std::same_as<::aatk::meta::repeat_t<0, void>, repeated_0_time_type_list>);
-
-  using int_repeated_5_times_type_list = ::aatk::meta::type_list<int, int, int, int, int>;
-  static_assert(std::same_as<::aatk::meta::repeat_t<5, int>, int_repeated_5_times_type_list>);
 }
 
 export consteval void does_meta_take_work() noexcept
