@@ -319,25 +319,24 @@ struct concat<type_list<Ts...>, type_list<Us...>>
 //  right half of the original type list is `concat_impl<BeginIdx + N / 2, N - N / 2, Ts...>::type`
 // 2. merge
 //  use the 2 lists specialization of `concat` to merge
-template <std::size_t BeginIdx, std::size_t N, list_of_types... Ts>
-struct concat_impl : concat<typename concat_impl<BeginIdx, N / 2, Ts...>::type, typename concat_impl<BeginIdx + N / 2, N - N / 2, Ts...>::type>
+template <std::size_t BeginIdx, std::size_t N, list_of_types T>
+struct concat_impl : concat<typename concat_impl<BeginIdx, N / 2, T>::type, typename concat_impl<BeginIdx + N / 2, N - N / 2, T>::type>
 {
 };
 
-template <std::size_t BeginIdx, list_of_types... Ts>
-struct concat_impl<BeginIdx, 1, Ts...>
+template <std::size_t BeginIdx, list_of_types T>
+struct concat_impl<BeginIdx, 1, T> : nth<BeginIdx, T>
 {
-  using type = Ts...[BeginIdx];
 };
 
-template <std::size_t BeginIdx, list_of_types... Ts>
-struct concat_impl<BeginIdx, 0, Ts...>
+template <std::size_t BeginIdx, list_of_types T>
+struct concat_impl<BeginIdx, 0, T>
 {
   using type = empty_type_list;
 };
 
 export template <list_of_types T, list_of_types... Ts>
-struct concat<T, Ts...> : concat_impl<0, 1 + sizeof...(Ts), T, Ts...>
+struct concat<T, Ts...> : concat_impl<0, 1 + sizeof...(Ts), type_list<T, Ts...>>
 {
 };
 
