@@ -60,6 +60,17 @@ export consteval void does_meta_repeat_work() noexcept
   static_assert(std::same_as<::aatk::meta::repeat_t<5, int>, int_repeated_5_times_type_list>);
 }
 
+template <::aatk::meta::list_of_types>
+struct huge_concat_test_helper;
+
+template <::aatk::meta::list_of_types... Ts>
+struct huge_concat_test_helper<::aatk::meta::type_list<Ts...>> : ::aatk::meta::concat<Ts...>
+{
+};
+
+template <::aatk::meta::list_of_types T>
+using huge_concat_test_helper_t = huge_concat_test_helper<T>::type;
+
 export consteval void does_meta_concat_work() noexcept
 {
   static_assert(std::same_as<::aatk::meta::concat_t<type_list_1>, type_list_1>);
@@ -77,6 +88,9 @@ export consteval void does_meta_concat_work() noexcept
   // test `repeat` complexity, length_v<type_list_4> * 1500 recursion depth (for a O(N) recursive implementation) will make the compiler crash by default
   using huge_concatenation_before = ::aatk::meta::repeat_t<1500, type_list_4>;
   using huge_concatenation_after = ::aatk::meta::repeat_t<::aatk::meta::length_v<type_list_4> * 1500, int>;
+
+  // test `concat` complexity, 1500 recursion depth (for a O(n) recursive implementation) will make the compiler crash by default
+  static_assert(std::same_as<huge_concat_test_helper_t<huge_concatenation_before>, huge_concatenation_after> == true);
 }
 
 export consteval void does_meta_reverse_work() noexcept
