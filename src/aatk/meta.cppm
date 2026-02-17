@@ -213,9 +213,6 @@ export template <std::size_t Idx, list_of_types T>
   requires (Idx < length_v<T>)
 struct nth;
 
-export template <std::size_t Idx>
-struct nth<Idx, type_list<>>;
-
 export template <std::size_t Idx, typename... Ts>
 struct nth<Idx, type_list<Ts...>>
 {
