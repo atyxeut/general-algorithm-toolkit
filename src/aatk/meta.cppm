@@ -471,19 +471,11 @@ export template <list_of_types T>
 using init_t = init<T>::type;
 
 // get a type list that contains the first N types of the given type list
-// O(N) time complexity
+// O(1) time complexity
 // name after Haskell Data.List take
 export template <std::size_t N, list_of_types T>
   requires (N <= length_v<T>)
-struct take : cons<head_t<T>, typename take<N - 1, tail_t<T>>::type>
-{
-};
-
-export template <list_of_types T>
-struct take<0, T>
-{
-  using type = empty_type_list;
-};
+using take = select_by_index_sequence<std::make_index_sequence<N>, T>;
 
 export template <std::size_t N, list_of_types T>
 using take_t = take<N, T>::type;

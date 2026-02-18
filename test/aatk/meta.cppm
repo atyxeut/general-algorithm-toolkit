@@ -133,8 +133,11 @@ export consteval void does_meta_init_work() noexcept
 
 export consteval void does_meta_take_work() noexcept
 {
-  using take_0_type_list = ::aatk::meta::empty_type_list;
-  static_assert(std::same_as<::aatk::meta::take_t<0, type_list_1>, take_0_type_list>);
+  using take_0_type_list_of_empty = ::aatk::meta::empty_type_list;
+  static_assert(std::same_as<::aatk::meta::take_t<0, ::aatk::meta::empty_type_list>, take_0_type_list_of_empty>);
+
+  using take_0_type_list_of_nonempty = ::aatk::meta::empty_type_list;
+  static_assert(std::same_as<::aatk::meta::take_t<0, type_list_1>, take_0_type_list_of_nonempty>);
 
   using take_3_type_list_of_1 = ::aatk::meta::type_list<double, float, std::vector<int>>;
   static_assert(std::same_as<::aatk::meta::take_t<3, type_list_1>, take_3_type_list_of_1>);
