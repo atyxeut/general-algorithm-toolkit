@@ -1,7 +1,8 @@
 *
 
 !.gitignore
-!LICENSE
+!COPYING
+!COPYING.LESSER
 !README.md
 
 !ruff.toml
