@@ -452,12 +452,8 @@ using tail_t = tail<T>::type;
 // O(1) time complexity
 // name after Haskell Data.List init
 export template <list_of_types T>
-struct init : select_by_index_sequence<std::make_index_sequence<length_v<T> - 1>, T>
-{
-};
-
-export template <>
-struct init<empty_type_list>;
+  requires (length_v<T> != 0)
+using init = select_by_index_sequence<std::make_index_sequence<length_v<T> - 1>, T>;
 
 export template <list_of_types T>
 using init_t = init<T>::type;
