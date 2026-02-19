@@ -267,7 +267,7 @@ export template <list_of_types T>
 constexpr std::size_t length_v = length<T>::value;
 
 // get the nth type of a type list, index starts at 0
-// O(1) time complexity (assuming C++26 pack indexing has O(1) time complexity)
+// O(1) time complexity, assume C++26 pack indexing has O(1) time complexity
 export template <std::size_t Idx, list_of_types T>
   requires (Idx < length_v<T>)
 struct nth;
