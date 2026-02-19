@@ -562,23 +562,32 @@ using invoke_t = invoke<T, TArgs...>::type;
 export template <wrapped_template T, typename... TArgs>
 constexpr auto invoke_v = invoke<T, TArgs...>::value;
 
-// get the longest prefix type list whose types all satisfy a given predicate
-// O(n) time complexity, where n is the length of the longest prefix
-// name after Haskell Data.List takeWhile
-export template <template <typename> typename TTPred, list_of_types>
-  requires predicate<TTPred>
-struct take_while;
+template <wrapped_predicate, list_of_types>
+struct take_while_impl;
 
-export template <template <typename> typename TTPred>
-struct take_while<TTPred, empty_type_list>
+template <wrapped_predicate TPred>
+struct take_while_impl<TPred, empty_type_list>
 {
   using type = empty_type_list;
 };
 
-export template <template <typename> typename TTPred, typename T, typename... Ts>
-struct take_while<TTPred, type_list<T, Ts...>> : std::conditional<TTPred<T>::value, concat_t<type_list<T>, typename take_while<TTPred, type_list<Ts...>>::type>, empty_type_list>
+template <wrapped_predicate TPred, list_of_types T0, list_of_types T1>
+struct take_while_lazy_evaluation_helper
+{
+  // cannot use inheritance here, otherwise the evaluation is not lazy
+  using type = concat_t<T0, typename take_while_impl<TPred, T1>::type>;
+};
+
+template <wrapped_predicate TPred, typename T, typename... Ts>
+struct take_while_impl<TPred, type_list<T, Ts...>> : std::conditional_t<invoke_v<TPred, T>, take_while_lazy_evaluation_helper<TPred, type_list<T>, type_list<Ts...>>, std::type_identity<empty_type_list>>
 {
 };
+
+// get the longest prefix type list whose types all satisfy a given predicate
+// O(k) time complexity, where k is the length of the longest prefix
+// name after Haskell Data.List takeWhile
+export template <template <typename> typename TTPred, list_of_types T>
+using take_while = take_while_impl<template_wrapper<TTPred>, T>;
 
 export template <template <typename> typename TTPred, list_of_types T>
 using take_while_t = take_while<TTPred, T>::type;
