@@ -341,15 +341,7 @@ struct repeat_impl<T, std::index_sequence<Is...>>
 // O(1) time complexity
 // name after Haskell Data.List repeat
 export template <std::size_t N, typename T>
-struct repeat : repeat_impl<T, std::make_index_sequence<N>>
-{
-};
-
-export template <typename T>
-struct repeat<0, T>
-{
-  using type = empty_type_list;
-};
+using repeat = repeat_impl<T, std::make_index_sequence<N>>;
 
 export template <std::size_t N, typename T>
 using repeat_t = repeat<N, T>::type;
