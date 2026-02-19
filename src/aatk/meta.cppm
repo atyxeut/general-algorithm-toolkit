@@ -608,26 +608,42 @@ struct take_while_end : reverse<take_while_t<TTPred, reverse_t<T>>>
 export template <template <typename> typename TTPred, list_of_types T>
 using take_while_end_t = take_while_end<TTPred, T>::type;
 
-// get a type list with a longest prefix type list removed, whose types all satisfy a given predicate
-// O(n) time complexity, where n is the count of types dropped
-// name after Haskell Data.List dropWhile
-export template <template <typename> typename TTPred, list_of_types T>
-  requires predicate<TTPred>
-struct drop_while : std::conditional<TTPred<head_t<T>>::value, typename drop_while<TTPred, tail_t<T>>::type, T>
-{
-};
+template <template <typename> typename, list_of_types>
+struct drop_while_impl;
 
-export template <template <typename> typename TTPred>
-struct drop_while<TTPred, empty_type_list>
+template <template <typename> typename TTPred>
+struct drop_while_impl<TTPred, empty_type_list>
 {
   using type = empty_type_list;
 };
+
+template <template <typename> typename, list_of_types>
+struct drop_while_impl_lazy_evaluation_helper;
+
+template <template <typename> typename TTPred, typename T, typename... Ts>
+struct drop_while_impl_lazy_evaluation_helper<TTPred, type_list<T, Ts...>>
+{
+    // cannot use inheritance here, otherwise the evaluation is not lazy
+  using type = drop_while_impl<TTPred, type_list<Ts...>>::type;
+};
+
+template <template <typename> typename TTPred, typename T, typename... Ts>
+struct drop_while_impl<TTPred, type_list<T, Ts...>> : std::conditional_t<TTPred<T>::value, drop_while_impl_lazy_evaluation_helper<TTPred, type_list<T, Ts...>>, std::type_identity<type_list<T, Ts...>>>
+{
+};
+
+// get a type list with a longest prefix type list removed, whose types all satisfy a given predicate
+// O(k) time complexity, where k is the longest dropped prefix
+// name after Haskell Data.List dropWhile
+export template <template <typename> typename TTPred, list_of_types T>
+  requires predicate<TTPred>
+using drop_while = drop_while_impl<TTPred, T>;
 
 export template <template <typename> typename TTPred, list_of_types T>
 using drop_while_t = drop_while<TTPred, T>::type;
 
 // get a type list with a longest suffix type list removed, whose types all satisfy a given predicate
-// O(n) time complexity, where n is the length of the given type list
+// O(k) time complexity, where k is the length of the longest dropped suffix
 // name after Haskell Data.List dropWhileEnd
 export template <template <typename> typename TTPred, list_of_types T>
   requires predicate<TTPred>
