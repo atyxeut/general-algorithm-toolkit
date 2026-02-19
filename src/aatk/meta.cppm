@@ -468,23 +468,18 @@ using take = select_by_index_sequence<std::make_index_sequence<N>, T>;
 export template <std::size_t N, list_of_types T>
 using take_t = take<N, T>::type;
 
-template <std::size_t N, list_of_types T>
-struct take_end_impl : take_end_impl<N - 1, tail_t<T>>
-{
-};
-
-template <list_of_types T>
-struct take_end_impl<0, T>
-{
-  using type = T;
-};
-
 // same as take, but take from the end
-// O(length - N) time complexity
+// O(1) time complexity
 export template <std::size_t N, list_of_types T>
   requires (N <= length_v<T>)
-struct take_end : take_end_impl<length_v<T> - N, T>
+struct take_end : select_by_index_sequence<make_index_sequence_of_range<length_v<T> - N, length_v<T> - 1>, T>
 {
+};
+
+export template <list_of_types T>
+struct take_end<0, T>
+{
+  using type = empty_type_list;
 };
 
 export template <std::size_t N, list_of_types T>

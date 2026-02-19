@@ -154,8 +154,11 @@ export consteval void does_meta_take_work() noexcept
 
 export consteval void does_meta_take_end_work() noexcept
 {
-  using take_0_type_list_from_end = ::aatk::meta::empty_type_list;
-  static_assert(std::same_as<::aatk::meta::take_end_t<0, type_list_1>, take_0_type_list_from_end>);
+  using take_0_type_list_of_empty_from_end = ::aatk::meta::empty_type_list;
+  static_assert(std::same_as<::aatk::meta::take_end_t<0, ::aatk::meta::empty_type_list>, take_0_type_list_of_empty_from_end>);
+
+  using take_0_type_list_of_nonempty_from_end = ::aatk::meta::empty_type_list;
+  static_assert(std::same_as<::aatk::meta::take_end_t<0, type_list_1>, take_0_type_list_of_nonempty_from_end>);
 
   using take_3_type_list_of_1_from_end = ::aatk::meta::type_list<float, std::vector<int>, long long>;
   static_assert(std::same_as<::aatk::meta::take_end_t<3, type_list_1>, take_3_type_list_of_1_from_end>);
