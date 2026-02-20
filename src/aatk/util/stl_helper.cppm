@@ -22,6 +22,8 @@ import aatk.meta;
 
 namespace aatk {
 
+namespace detail {
+
 template <typename, std::size_t...>
 struct array_impl;
 
@@ -37,10 +39,12 @@ struct array_impl<T, Dim, Dims...>
   using type = std::array<typename array_impl<T, Dims...>::type, Dim>;
 };
 
+} // namespace detail
+
 // aatk::array<int, 3, 5, 2> arr3d {};
 //   same as: std::array<std::array<std::array<int, 2>, 5>, 3> arr3d {};
 export template <typename T, std::size_t... Dims>
-using array = array_impl<T, Dims...>::type;
+using array = detail::array_impl<T, Dims...>::type;
 
 export namespace meta {
 
@@ -121,6 +125,8 @@ struct cur_dim_allocator<TElement, TAllocatorList, memory::std_pmr_allocator_tag
 template <typename TElement, meta::list_of_types TAllocatorList>
 using cur_dim_allocator_t = cur_dim_allocator<TElement, TAllocatorList>::type;
 
+namespace detail {
+
 template <typename T, std::size_t DimCnt, meta::list_of_types TAllocatorList>
   requires (DimCnt != 0)
 class vector_impl;
@@ -146,13 +152,17 @@ template <typename T, std::size_t DimCnt = 1, meta::list_of_types TAllocatorList
   requires (meta::length_v<TAllocatorList> <= DimCnt)
 using vector_impl_t = vector_impl<T, DimCnt, TAllocatorList>::type;
 
+} // namespace detail
+
 // aatk::vector<int> vec1d;
 //   same as: std::vector<int> vec1d;
 // aatk::vector<int, 4> vec4d;
 //   same as: std::vector<std::vector<std::vector<std::vector<int>>>> vec4d;
 export template <typename T, std::size_t DimCnt = 1, typename TInnermostDimAllocator = memory::std_allocator_tag, typename... TAllocators>
   requires (sizeof...(TAllocators) < DimCnt)
-using vector = vector_impl<T, DimCnt, meta::type_list<TInnermostDimAllocator, TAllocators...>>::type;
+using vector = detail::vector_impl_t<T, DimCnt, meta::type_list<TInnermostDimAllocator, TAllocators...>>;
+
+namespace detail {
 
 template <typename TElem, meta::list_of_types TAllocatorList, std::integral TDim, typename... Ts>
   requires (sizeof(TDim) <= sizeof(std::size_t) && sizeof...(Ts) > 0 && meta::length_v<TAllocatorList> <= sizeof...(Ts))
@@ -171,6 +181,8 @@ template <typename TElem, meta::list_of_types TAllocatorList, std::integral TDim
   }
 }
 
+} // namespace detail
+
 // auto vec3d = aatk::make_vector<int>(x, y, z, 1);
 //   same as: auto vec3d = std::vector<std::vector<std::vector<int>>>(
 //                           x,
@@ -185,7 +197,7 @@ export template <typename TElem, typename TInnermostDimAllocator = memory::std_a
   requires (sizeof(TDim) <= sizeof(std::size_t) && sizeof...(Ts) > 0 && sizeof...(TAllocators) < sizeof...(Ts))
 [[nodiscard]] constexpr auto make_vector(TDim first_dim_size, Ts&&... args)
 {
-  return make_vector_impl<TElem, meta::type_list<TInnermostDimAllocator, TAllocators...>>(first_dim_size, std::forward<Ts>(args)...);
+  return detail::make_vector_impl<TElem, meta::type_list<TInnermostDimAllocator, TAllocators...>>(first_dim_size, std::forward<Ts>(args)...);
 }
 
 export namespace meta {

@@ -147,6 +147,8 @@ concept floating_point = ieee754_floating_point<T> || is_big_decimal_v<T>;
 
 namespace aatk::meta {
 
+namespace detail {
+
 template <typename T, typename = std::remove_cv_t<T>, bool = is_big_decimal_v<T>>
 struct make_higher_precision_selector;
 
@@ -186,11 +188,13 @@ struct make_higher_precision_selector<T, std::remove_cv_t<T>, true>
   using type = T;
 };
 
+} // namespace detail
+
 // for the given floating-point type, obtain a floating-point type that has double precision
 // for a big decimal type: obtain itself
 // cv-qualifiers are kept
-export template <typename T>
-using make_higher_precision = make_higher_precision_selector<T>;
+export template <meta::floating_point T>
+using make_higher_precision = detail::make_higher_precision_selector<T>;
 
 export template <typename T>
 using make_higher_precision_t = make_higher_precision<T>::type;

@@ -181,6 +181,8 @@ concept nonbool_fixed_width_integral = fixed_width_integral<T> && !boolean<T>;
 
 namespace aatk::meta {
 
+namespace detail {
+
 template <typename T, typename = std::remove_cv_t<T>>
 struct make_signed_selector : std::make_signed<T>
 {
@@ -206,11 +208,15 @@ struct make_signed_selector<T, fixed_width_integer::u<WidthBits>> : claim_cv<T, 
 {
 };
 
-export template <typename T>
-using make_signed = make_signed_selector<T>;
+} // namespace detail
+
+export template <meta::fixed_width_integral T>
+using make_signed = detail::make_signed_selector<T>;
 
 export template <typename T>
 using make_signed_t = make_signed<T>::type;
+
+namespace detail {
 
 template <typename T, typename = std::remove_cv_t<T>>
 struct make_unsigned_selector : std::make_unsigned<T>
@@ -237,8 +243,10 @@ struct make_unsigned_selector<T, fixed_width_integer::u<WidthBits>> : claim_cv<T
 {
 };
 
-export template <typename T>
-using make_unsigned = make_unsigned_selector<T>;
+} // namespace detail
+
+export template <meta::fixed_width_integral T>
+using make_unsigned = detail::make_unsigned_selector<T>;
 
 export template <typename T>
 using make_unsigned_t = make_unsigned<T>::type;
@@ -282,6 +290,8 @@ concept nonbool_integral = integral<T> && !boolean<T>;
 } // namespace aatk::meta
 
 namespace aatk::meta {
+
+namespace detail {
 
 template <typename T, usize = (sizeof(T) < sizeof(i32) ? 0 : sizeof(T))>
 struct make_larger_width_selector_for_standard;
@@ -336,11 +346,13 @@ struct make_larger_width_selector_for_custom<T, std::remove_cv_t<T>, true>
   using type = T;
 };
 
+} // namespace detail
+
 // for the given fixed-width integer type: obtain i/u32 if its width is smaller than 32 bits, otherwise obtain a fixed-width integer type with double width
 // for a big integer type: obtain itself
 // cv-qualifiers and signedness are kept
 export template <integral T>
-using make_larger_width = std::conditional_t<std::integral<T>, make_larger_width_selector_for_standard<T>, make_larger_width_selector_for_custom<T>>;
+using make_larger_width = std::conditional_t<std::integral<T>, detail::make_larger_width_selector_for_standard<T>, detail::make_larger_width_selector_for_custom<T>>;
 
 export template <typename T>
 using make_larger_width_t = make_larger_width<T>::type;

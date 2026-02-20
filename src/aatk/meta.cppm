@@ -36,6 +36,8 @@ struct is_cv : std::bool_constant<std::is_const_v<T> && std::is_volatile_v<T>>
 export template <typename T>
 constexpr bool is_cv_v = is_cv<T>::value;
 
+namespace detail {
+
 template <typename TFrom, typename TTo, bool = std::is_const_v<TFrom>, bool = std::is_volatile_v<TFrom>>
 struct claim_cv_selector;
 
@@ -64,9 +66,11 @@ struct claim_cv_selector<TFrom, TTo, false, false>
   using type = TTo;
 };
 
+} // namespace detail
+
 // extract the cv-qualifiers of TFrom and apply them to TTo
 export template <typename TFrom, typename TTo>
-using claim_cv = claim_cv_selector<TFrom, TTo>;
+using claim_cv = detail::claim_cv_selector<TFrom, TTo>;
 
 export template <typename TFrom, typename TTo>
 using claim_cv_t = claim_cv<TFrom, TTo>::type;
@@ -80,6 +84,8 @@ concept no_cvref_not_same_as = !no_cvref_same_as<T, U>;
 export template <std::size_t N>
 using index_constant = std::integral_constant<std::size_t, N>;
 
+namespace detail {
+
 template <typename TIntegerSequence>
 struct make_reversed_integer_sequence_impl;
 
@@ -89,16 +95,20 @@ struct make_reversed_integer_sequence_impl<std::integer_sequence<T, Is...>>
   using type = std::integer_sequence<T, (sizeof...(Is) - 1 - Is)...>;
 };
 
+} // namespace detail
+
 // generate a sequence of integers of type T in [0, N) in a reversed order
 // O(1) time complexity, assume `std::make_integer_sequence` will be optimized by compiler intrinsics, i.e. not a naive recursive implementation
 export template <std::integral T, T N>
-using make_reversed_integer_sequence = make_reversed_integer_sequence_impl<std::make_integer_sequence<T, N>>::type;
+using make_reversed_integer_sequence = detail::make_reversed_integer_sequence_impl<std::make_integer_sequence<T, N>>::type;
 
 export template <std::size_t N>
 using make_reversed_index_sequence = make_reversed_integer_sequence<std::size_t, N>;
 
 export template <typename... Ts>
 using reversed_index_sequence_for = make_reversed_index_sequence<sizeof...(Ts)>;
+
+namespace detail {
 
 template <std::integral T, T Begin, typename TIntegerSequence>
 struct make_integer_sequence_of_range_impl;
@@ -109,15 +119,19 @@ struct make_integer_sequence_of_range_impl<T, Begin, std::integer_sequence<T, Is
   using type = std::integer_sequence<T, (Begin + Is)...>;
 };
 
+} // namespace detail
+
 // generate a sequence of integers of type T in [Begin, End]
 // O(1) time complexity, assume `std::make_integer_sequence` will be optimized by compiler intrinsics, i.e. not a naive recursive implementation
 export template <std::integral T, T Begin, T End>
   requires (Begin <= End)
-using make_integer_sequence_of_range = make_integer_sequence_of_range_impl<T, Begin, std::make_integer_sequence<T, End - Begin + 1>>::type;
+using make_integer_sequence_of_range = detail::make_integer_sequence_of_range_impl<T, Begin, std::make_integer_sequence<T, End - Begin + 1>>::type;
 
 export template <std::size_t Begin, std::size_t End>
   requires (Begin <= End)
 using make_index_sequence_of_range = make_integer_sequence_of_range<std::size_t, Begin, End>;
+
+namespace detail {
 
 template <std::integral T, T End, typename TIntegerSequence>
 struct make_reversed_integer_sequence_of_range_impl;
@@ -128,11 +142,13 @@ struct make_reversed_integer_sequence_of_range_impl<T, End, std::integer_sequenc
   using type = std::integer_sequence<T, (End - Is)...>;
 };
 
+} // namespace detail
+
 // generate a sequence of integers of type T in [Begin, End] in a reversed order
 // O(1) time complexity, assume `std::make_integer_sequence` will be optimized by compiler intrinsics, i.e. not a naive recursive implementation
 export template <std::integral T, T Begin, T End>
   requires (Begin <= End)
-using make_reversed_integer_sequence_of_range = make_reversed_integer_sequence_of_range_impl<T, End, std::make_integer_sequence<T, End - Begin + 1>>::type;
+using make_reversed_integer_sequence_of_range = detail::make_reversed_integer_sequence_of_range_impl<T, End, std::make_integer_sequence<T, End - Begin + 1>>::type;
 
 export template <std::size_t Begin, std::size_t End>
   requires (Begin <= End)
@@ -328,6 +344,8 @@ struct snoc<T, type_list<Ts...>>
 export template <typename T, list_of_types U>
 using snoc_t = snoc<T, U>::type;
 
+namespace detail {
+
 template <typename T, typename TIndexSequence>
 struct repeat_impl;
 
@@ -337,11 +355,13 @@ struct repeat_impl<T, std::index_sequence<Is...>>
   using type = type_list<std::enable_if_t<(Is >= 0), T>...>;
 };
 
+} // namespace detail
+
 // get a type list that contains N identical types
 // O(1) time complexity
 // name after Haskell Data.List repeat
 export template <std::size_t N, typename T>
-using repeat = repeat_impl<T, std::make_index_sequence<N>>;
+using repeat = detail::repeat_impl<T, std::make_index_sequence<N>>;
 
 export template <std::size_t N, typename T>
 using repeat_t = repeat<N, T>::type;
@@ -363,6 +383,8 @@ struct concat<type_list<Ts...>, type_list<Us...>>
 {
   using type = type_list<Ts..., Us...>;
 };
+
+namespace detail {
 
 // devide and conquer for >= 3 type lists for better time complexity:
 // 1. divide
@@ -386,8 +408,10 @@ struct concat_impl<BeginIdx, 0, T>
   using type = empty_type_list;
 };
 
+} // namespace detail
+
 export template <list_of_types T, list_of_types... Ts>
-struct concat<T, Ts...> : concat_impl<0, 1 + sizeof...(Ts), type_list<T, Ts...>>
+struct concat<T, Ts...> : detail::concat_impl<0, 1 + sizeof...(Ts), type_list<T, Ts...>>
 {
 };
 
@@ -491,6 +515,8 @@ using drop_end = take<length_v<T> - N, T>;
 export template <std::size_t N, list_of_types T>
 using drop_end_t = drop_end<N, T>::type;
 
+namespace detail {
+
 template <template <typename...> typename, typename>
 struct is_predicate_tester;
 
@@ -509,9 +535,11 @@ struct is_predicate_impl<TT, std::index_sequence<Is...>> : std::disjunction<is_p
 {
 };
 
+} // namespace detail
+
 export template <template <typename...> typename TT, std::size_t ArityLimit = 10>
   requires (ArityLimit > 0)
-struct is_predicate : is_predicate_impl<TT, std::make_index_sequence<ArityLimit>>
+struct is_predicate : detail::is_predicate_impl<TT, std::make_index_sequence<ArityLimit>>
 {
 };
 
@@ -562,6 +590,8 @@ using invoke_t = invoke<T, TArgs...>::type;
 export template <wrapped_template T, typename... TArgs>
 constexpr auto invoke_v = invoke<T, TArgs...>::value;
 
+namespace detail {
+
 template <wrapped_predicate TPred, list_of_types TRemainingList, list_of_types TTakenList = empty_type_list>
 struct take_while_impl;
 
@@ -587,12 +617,14 @@ struct take_while_impl<TPred, type_list<T, Ts...>, type_list<TTaken...>>
 {
 };
 
+} // namespace detail
+
 // get the longest prefix type list whose types all satisfy a given predicate
 // O(k) time complexity, where k is the length of the longest prefix
 // name after Haskell Data.List takeWhile
 export template <template <typename> typename TTPred, list_of_types T>
   requires predicate<TTPred>
-using take_while = take_while_impl<template_wrapper<TTPred>, T>;
+using take_while = detail::take_while_impl<template_wrapper<TTPred>, T>;
 
 export template <template <typename> typename TTPred, list_of_types T>
 using take_while_t = take_while<TTPred, T>::type;
@@ -607,6 +639,8 @@ struct take_while_end : reverse<take_while_t<TTPred, reverse_t<T>>>
 
 export template <template <typename> typename TTPred, list_of_types T>
 using take_while_end_t = take_while_end<TTPred, T>::type;
+
+namespace detail {
 
 template <template <typename> typename, list_of_types>
 struct drop_while_impl;
@@ -632,12 +666,14 @@ struct drop_while_impl<TTPred, type_list<T, Ts...>> : std::conditional_t<TTPred<
 {
 };
 
+} // namespace detail
+
 // get a type list with a longest prefix type list removed, whose types all satisfy a given predicate
 // O(k) time complexity, where k is the longest dropped prefix
 // name after Haskell Data.List dropWhile
 export template <template <typename> typename TTPred, list_of_types T>
   requires predicate<TTPred>
-using drop_while = drop_while_impl<TTPred, T>;
+using drop_while = detail::drop_while_impl<TTPred, T>;
 
 export template <template <typename> typename TTPred, list_of_types T>
 using drop_while_t = drop_while<TTPred, T>::type;
