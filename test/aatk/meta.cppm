@@ -55,13 +55,32 @@ using type_list_4 = ::aatk::meta::type_list<int, int, int, int, int, int, int>;
 using type_list_5 = ::aatk::meta::type_list<const float, float, double, int, const double, char, std::byte, volatile unsigned long long, volatile void, char, unsigned char, signed char, short, void, const void>;
 using type_list_6 = ::aatk::meta::type_list<const float, float, double, int, const double, std::byte, volatile unsigned long long, volatile void, unsigned char, signed char, short, void, const void>;
 
+using indexed_type_list_1 = ::aatk::meta::indexed_type_list<std::make_index_sequence<::aatk::meta::length_v<type_list_1>>, type_list_1>;
+using indexed_type_list_2 = ::aatk::meta::indexed_type_list<std::make_index_sequence<::aatk::meta::length_v<type_list_2>>, type_list_2>;
+using indexed_type_list_3 = ::aatk::meta::indexed_type_list<std::make_index_sequence<::aatk::meta::length_v<type_list_3>>, type_list_3>;
+using indexed_type_list_4 = ::aatk::meta::indexed_type_list<std::make_index_sequence<::aatk::meta::length_v<type_list_4>>, type_list_4>;
+using indexed_type_list_5 = ::aatk::meta::indexed_type_list<std::make_index_sequence<::aatk::meta::length_v<type_list_5>>, type_list_5>;
+using indexed_type_list_6 = ::aatk::meta::indexed_type_list<std::make_index_sequence<::aatk::meta::length_v<type_list_6>>, type_list_6>;
+
 export consteval void does_meta_has_none_any_work() noexcept
 {
   static_assert(::aatk::meta::has_none_v<int, type_list_1> == true);
   static_assert(::aatk::meta::has_none_v<int, type_list_3> == false);
+  static_assert(::aatk::meta::has_none_v<int, indexed_type_list_1> == true);
+  static_assert(::aatk::meta::has_none_v<int, indexed_type_list_3> == false);
 
   static_assert(::aatk::meta::has_any_v<double, type_list_1> == true);
   static_assert(::aatk::meta::has_any_v<int, type_list_2> == false);
+  static_assert(::aatk::meta::has_any_v<double, indexed_type_list_1> == true);
+  static_assert(::aatk::meta::has_any_v<int, indexed_type_list_2> == false);
+}
+
+export consteval void does_meta_map_work() noexcept
+{
+  static_assert(std::same_as<::aatk::meta::map_t<2, indexed_type_list_1>, ::aatk::meta::indexed_type<2, std::vector<int>>>);
+  static_assert(std::same_as<::aatk::meta::map_t<0, indexed_type_list_2>, ::aatk::meta::indexed_type<0, std::string>>);
+  static_assert(std::same_as<::aatk::meta::map_t<1, indexed_type_list_3>, ::aatk::meta::indexed_type<1, char>>);
+  static_assert(std::same_as<::aatk::meta::map_t<::aatk::meta::length_v<indexed_type_list_6> - 1, indexed_type_list_6>, ::aatk::meta::indexed_type<::aatk::meta::length_v<indexed_type_list_6> - 1, const void>>);
 }
 
 export consteval void does_meta_repeat_work() noexcept
