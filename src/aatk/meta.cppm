@@ -152,6 +152,28 @@ using make_reversed_integer_sequence_of_range = detail::make_reversed_integer_se
 export template <std::size_t Begin, std::size_t End>
 using make_reversed_index_sequence_of_range = make_reversed_integer_sequence_of_range<std::size_t, Begin, End>;
 
+// add an offset to all the integers in the given `std::integer_sequence`
+// O(1) time complexity
+export template <std::integral T, T Offset, typename TIntegerSequence>
+struct shift_integer_sequence;
+
+export template <typename TInt, TInt Offset, TInt... Is>
+struct shift_integer_sequence<TInt, Offset, std::integer_sequence<TInt, Is...>>
+{
+  using type = std::integer_sequence<TInt, (Is + Offset)...>;
+};
+
+export template <typename TInt, TInt Offset, typename TIntegerSequence>
+using shift_integer_sequence_t = shift_integer_sequence<TInt, Offset, TIntegerSequence>::type;
+
+// add an offset to all indices in the given `std::index_sequence`
+// O(1) time complexity
+template <std::size_t Offset, typename TIndexSequence>
+using shift_index_sequence = shift_integer_sequence<std::size_t, Offset, TIndexSequence>;
+
+template <std::size_t Offset, typename TIndexSequence>
+using shift_index_sequence_t = shift_index_sequence<Offset, TIndexSequence>::type;
+
 export template <typename T, typename... Us>
   requires (sizeof...(Us) > 0)
 struct is_none_of : std::conjunction<is_none_of<T, Us>...>
