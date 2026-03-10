@@ -26,14 +26,14 @@ export template <std::ranges::forward_range Range>
 [[nodiscard]] constexpr auto compress_coordinates(const Range& range)
 {
   std::vector<std::ranges::range_value_t<Range>> tmp(std::ranges::begin(range), std::ranges::end(range));
-  std::ranges::sort(tmp);
-  const auto [tmp_end, _] = std::ranges::unique(tmp);
+  std::sort(tmp.begin(), tmp.end());
+  const auto tmp_end = std::unique(tmp.begin(), tmp.end());
 
   const auto n = std::ranges::size(range);
   std::vector<int> rank(n);
-  const auto tmp_begin = std::ranges::begin(tmp);
-  for (std::size_t i = 0; const auto& elem : range)
-    rank[i++] = static_cast<int>(std::ranges::lower_bound(tmp_begin, tmp_end, elem) - tmp_begin);
+  const auto tmp_begin = tmp.begin();
+  for (auto i = 0uz; const auto& elem : range)
+    rank[i++] = static_cast<int>(std::lower_bound(tmp_begin, tmp_end, elem) - tmp_begin);
 
   return rank;
 }
@@ -45,16 +45,16 @@ export template <std::ranges::input_range Range>
   const auto n = std::ranges::size(range);
   std::vector<std::pair<std::ranges::range_value_t<Range>, std::size_t>> tmp;
   tmp.reserve(n);
-  for (std::size_t i = 0; auto&& elem : range) {
+  for (auto i = 0uz; auto&& elem : range) {
     if constexpr (std::is_rvalue_reference_v<Range>)
       tmp.emplace_back(std::move(elem), i++);
     else
       tmp.emplace_back(elem, i++);
   }
-  std::ranges::sort(tmp);
+  std::sort(tmp.begin(), tmp.end());
 
   std::vector<int> rank(n);
-  for (std::size_t i = 0; i < n; ++i)
+  for (auto i = 0uz; i < n; ++i)
     rank[tmp[i].second] = static_cast<int>(i);
 
   return rank;
