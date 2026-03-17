@@ -21,7 +21,7 @@ export module test.aatk.util.stl_helper;
 
 import std;
 
-import aatk.memory;
+import aatk.memory.core;
 import aatk.meta;
 import aatk.util.stl_helper;
 

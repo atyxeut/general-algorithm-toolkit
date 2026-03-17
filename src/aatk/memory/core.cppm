@@ -13,7 +13,35 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this library.  If not, see <https://www.gnu.org/licenses/>.
 
-export module aatk.memory;
+export module aatk.memory.core;
 
-export import aatk.memory.core;
-export import aatk.memory.storage_buffer;
+import aatk.math.integer.core;
+
+export namespace aatk {
+
+// represent std::allocator<T>
+struct std_allocator_tag
+{
+};
+
+// represent std::pmr::polymorphic_allocator<T>
+struct std_pmr_allocator_tag
+{
+};
+
+template <meta::for_size_integral T>
+constexpr T dynamic_capacity = static_cast<T>(-1);
+
+enum class resource_location
+{
+  inplace,
+  heap
+};
+
+enum class exception_safety
+{
+  basic,
+  strong
+};
+
+} // namespace aatk

@@ -17,7 +17,7 @@ export module aatk.util.stl_helper;
 
 import std;
 
-import aatk.memory;
+import aatk.memory.core;
 import aatk.meta;
 
 namespace aatk {
