@@ -17,7 +17,7 @@ export module aatk.random;
 
 import std;
 
-import aatk.data_structure.graph;
+import aatk.data_structure.graph.storage;
 import aatk.math.integer;
 
 export namespace aatk::random {

@@ -15,4 +15,9 @@
 
 export module aatk.data_structure;
 
+export import aatk.data_structure.binary_search_tree;
 export import aatk.data_structure.graph;
+export import aatk.data_structure.heap;
+export import aatk.data_structure.segment_tree;
+export import aatk.data_structure.trie;
+export import aatk.data_structure.union_find;

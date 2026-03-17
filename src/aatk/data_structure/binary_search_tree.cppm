@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this library.  If not, see <https://www.gnu.org/licenses/>.
 
-export module aatk.data_structure.graph;
+export module aatk.data_structure.binary_search_tree;
 
-export import aatk.data_structure.graph.storage;
+export import aatk.data_structure.binary_search_tree.avl_tree;
+export import aatk.data_structure.binary_search_tree.naive;
+export import aatk.data_structure.binary_search_tree.red_black_tree;
