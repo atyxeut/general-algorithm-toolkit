@@ -20,7 +20,6 @@ export import aatk.debug;
 export import aatk.math;
 export import aatk.memory;
 export import aatk.meta;
-export import aatk.misc;
 export import aatk.random;
 export import aatk.simd;
 export import aatk.util;

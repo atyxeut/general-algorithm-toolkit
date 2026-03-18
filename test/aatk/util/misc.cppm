@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-export module test.aatk.misc;
+export module test.aatk.util.misc;
 
 import std;
 
-import aatk.misc;
+import aatk.util.misc;

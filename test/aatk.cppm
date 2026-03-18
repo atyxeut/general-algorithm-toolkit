@@ -17,5 +17,4 @@ export module test.aatk;
 
 export import test.aatk.math;
 export import test.aatk.meta;
-export import test.aatk.misc;
 export import test.aatk.util;
