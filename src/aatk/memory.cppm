@@ -16,4 +16,3 @@
 export module aatk.memory;
 
 export import aatk.memory.core;
-export import aatk.memory.storage_buffer;
