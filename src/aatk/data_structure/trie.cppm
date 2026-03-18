@@ -15,5 +15,5 @@
 
 export module aatk.data_structure.trie;
 
-export import aatk.data_structure.trie.dynamic;
 export import aatk.data_structure.trie.flat;
+export import aatk.data_structure.trie.vanilla;
