@@ -148,8 +148,7 @@ public:
   }
 
 private:
-  enum class count_type_
-  {
+  enum class count_type_ {
     full_string,
     prefix
   };

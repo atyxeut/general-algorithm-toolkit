@@ -20,11 +20,7 @@ import std;
 import aatk.util.std_extension.container;
 import aatk.util.std_extension.io;
 
-namespace test::aatk::util {
-
-using namespace ::aatk;
-
-} // namespace test::aatk::util
+namespace test::aatk::util { using namespace ::aatk; } // namespace test::aatk::util
 
 export namespace test::aatk::util {
 

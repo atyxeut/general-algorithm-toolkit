@@ -74,14 +74,12 @@ export namespace aatk {
 template <meta::for_size_integral T>
 constexpr T dynamic_capacity = static_cast<T>(-1);
 
-enum class resource_location
-{
+enum class resource_location {
   inplace,
   heap
 };
 
-enum class exception_safety
-{
+enum class exception_safety {
   basic,
   strong
 };

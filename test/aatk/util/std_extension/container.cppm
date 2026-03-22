@@ -24,11 +24,7 @@ import std;
 import aatk.memory.core;
 import aatk.util.std_extension.container;
 
-namespace test::aatk::util {
-
-using namespace ::aatk;
-
-} // namespace test::aatk::util
+namespace test::aatk::util { using namespace ::aatk; } // namespace test::aatk::util
 
 export namespace test::aatk::util {
 

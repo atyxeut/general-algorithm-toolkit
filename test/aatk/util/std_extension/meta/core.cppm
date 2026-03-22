@@ -19,11 +19,7 @@ import std;
 
 import aatk.util.std_extension.meta.core;
 
-namespace test::aatk::meta {
-
-using namespace ::aatk::meta;
-
-} // namespace test::aatk::meta
+namespace test::aatk::meta { using namespace ::aatk::meta; } // namespace test::aatk::meta
 
 export namespace test::aatk::meta {
 

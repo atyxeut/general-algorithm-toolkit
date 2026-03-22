@@ -19,11 +19,7 @@ import std;
 
 import aatk.math.floating_point;
 
-namespace test::aatk {
-
-using namespace ::aatk;
-
-} // namespace test::aatk
+namespace test::aatk { using namespace ::aatk; } // namespace test::aatk
 
 namespace test::aatk::meta {
 
