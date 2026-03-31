@@ -17,8 +17,8 @@ export module fmia.util;
 
 import std;
 
-export import fmia.util.misc;
 export import fmia.util.std_extension;
+export import fmia.util.tower_of_hanoi;
 
 namespace fmia {
 
