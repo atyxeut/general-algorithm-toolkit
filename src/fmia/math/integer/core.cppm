@@ -333,10 +333,13 @@ template <typename T>
 constexpr bool is_big_integer_v = is_big_integer<T>::value;
 
 template <typename T>
-concept signed_integral = fixed_width_signed_integral<T> || is_big_integer_v<T>;
+concept arbitrary_precision_integral = is_big_integer_v<T>;
 
 template <typename T>
-concept integral = signed_integral<T> || fixed_width_unsigned_integral<T>;
+concept signed_integral = fixed_width_signed_integral<T> || arbitrary_precision_integral<T>;
+
+template <typename T>
+concept integral = fixed_width_integral<T> || arbitrary_precision_integral<T>;
 
 template <typename T>
 concept nonbool_integral = integral<T> && !boolean<T>;
