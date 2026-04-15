@@ -104,7 +104,7 @@ std::ostream& operator <<(std::ostream& ostr, const std::tuple<Ts...>& t)
   return ostr;
 }
 
-namespace fmia::meta {
+namespace fmia::meta::legacy::cpp17 {
 
 namespace detail {
 
@@ -130,6 +130,15 @@ using is_std_ostream_interactable = detail::is_std_ostream_interactable_impl<T>;
 export template <typename T>
 constexpr bool is_std_ostream_interactable_v = is_std_ostream_interactable<T>::value;
 
+} // namespace fmia::meta::legacy::cpp17
+
+export namespace fmia::meta {
+
+// note usable: infinitely recursive constraint (llvm 22)
+// however its fine for gcc and msvc
+template <typename T>
+concept std_ostream_interactable = requires(std::ostream& ostr, T t) { ostr << t; };
+
 } // namespace fmia::meta
 
 namespace fmia {
@@ -140,7 +149,7 @@ export template <
   std::ranges::input_range Range, std::convertible_to<std::string> Delim = std::string,
   typename Elem = std::ranges::range_value_t<Range>
 >
-  requires (meta::is_std_ostream_interactable_v<Elem> && !std::is_array_v<Elem>)
+  requires (meta::legacy::cpp17::is_std_ostream_interactable_v<Elem> && !std::is_array_v<Elem>)
 std::size_t print(std::ostream& ostr, Range&& range, Delim&& delim = std::string(1, ' '), bool new_line = false)
 {
   for (auto it = std::ranges::begin(range), it_end = std::ranges::end(range); it != it_end; ++it)
@@ -158,7 +167,7 @@ export template <
   std::ranges::input_range Range, std::convertible_to<std::string> Delim = std::string,
   typename Elem = std::ranges::range_value_t<Range>
 >
-  requires (!meta::is_std_ostream_interactable_v<Elem> && std::ranges::input_range<Elem>)
+  requires (!meta::legacy::cpp17::is_std_ostream_interactable_v<Elem> && std::ranges::input_range<Elem>)
 std::size_t print(std::ostream& ostr, Range&& range, Delim&& delim = std::string(1, ' '), bool new_line = false)
 {
   std::size_t cur_dim = 0;
@@ -190,10 +199,9 @@ void print(std::ostream& ostr, const T& arr, Delim&& delim = std::string(1, ' ')
 } // namespace fmia
 
 // avoid ambiguous overloads when Range is std::string&, int[2][3], ...
-// some how we cannot use requires here, for clang 21.1.0, this is an infinitely recursive constraint (maybe clang's
-// bug? gcc and msvc don't have this issue)
 export template <
-  std::ranges::input_range Range, typename = std::enable_if_t<!::fmia::meta::is_std_ostream_interactable_v<Range>>
+  std::ranges::input_range Range,
+  typename = std::enable_if_t<!::fmia::meta::legacy::cpp17::is_std_ostream_interactable_v<Range>>
 >
 auto& operator <<(std::ostream& ostr, Range&& range)
 {
