@@ -629,3 +629,15 @@ template <typename T>
 using make_higher_precision_t = make_higher_precision<T>::type;
 
 }
+
+namespace fmia::big_integer::naive {
+  
+}
+
+namespace fmia::big_integer::naive::delayed_carry {
+  
+}
+
+namespace fmia::big_integer::naive::immediate_carry {
+  
+}
