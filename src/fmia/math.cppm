@@ -19,7 +19,6 @@ export import fmia.math.complex_number;
 export import fmia.math.core;
 export import fmia.math.counting;
 export import fmia.math.equation;
-export import fmia.math.fraction;
 export import fmia.math.geometry;
 export import fmia.math.op;
 export import fmia.math.quaternion;
