@@ -99,6 +99,70 @@ consteval void does_make_higher_precision_for_floating_point_work() noexcept
   static_assert(std::same_as<make_higher_precision_t<ieee754_float::d<1024>>, ieee754_float::d<2048>> == true);
 }
 
+consteval void does_compare_precision_for_integral_work() noexcept
+{
+  namespace fp = fixed_precision_integer;
+
+  static_assert(compare_precision_v<int, int> == 0);
+  static_assert(compare_precision_v<int, long long> == -1);
+  static_assert(compare_precision_v<int, signed char> == 1);
+  static_assert(!precision_comparable<int, unsigned int>);
+  static_assert(!precision_comparable<unsigned int, int>);
+
+  static_assert(compare_precision_v<int, fp::i<256>> == -1);
+  static_assert(compare_precision_v<fp::i<256>, int> == 1);
+  static_assert(!precision_comparable<int, fp::u<256>>);
+  static_assert(!precision_comparable<fp::u<256>, int>);
+
+  static_assert(compare_precision_v<int, i128> == -1);
+  static_assert(compare_precision_v<i128, int> == 1);
+  static_assert(!precision_comparable<int, u128>);
+  static_assert(!precision_comparable<u128, int>);
+
+  static_assert(compare_precision_v<i128, i128> == 0);
+  static_assert(!precision_comparable<i128, u128>);
+
+  static_assert(compare_precision_v<i128, fp::i<128>> == 0);
+  static_assert(compare_precision_v<fp::u<128>, u128> == 0);
+
+  static_assert(compare_precision_v<fp::i<128>, fp::i<128>> == 0);
+  static_assert(compare_precision_v<fp::i<128>, fp::i<1024>> == -1);
+  static_assert(compare_precision_v<fp::i<256>, fp::i<128>> == 1);
+
+  static_assert(compare_precision_v<fp::u<128>, fp::u<128>> == 0);
+  static_assert(compare_precision_v<fp::u<128>, fp::u<1024>> == -1);
+  static_assert(compare_precision_v<fp::u<256>, fp::u<128>> == 1);
+
+  static_assert(!precision_comparable<fp::i<128>, fp::u<128>>);
+  static_assert(!precision_comparable<fp::u<128>, fp::i<128>>);
+}
+
+consteval void does_compare_precision_for_floating_point_work() noexcept
+{
+  namespace fp = ieee754_float;
+
+  static_assert(compare_precision_v<float, float> == 0);
+  static_assert(compare_precision_v<float, double> == -1);
+  static_assert(compare_precision_v<double, float> == 1);
+
+  static_assert(compare_precision_v<double, f128> == -1);
+  static_assert(compare_precision_v<f128, f128> == 0);
+
+  static_assert(compare_precision_v<double, fp::f<128>> == -1);
+
+  static_assert(compare_precision_v<fp::f<128>, fp::f<128>> == 0);
+  static_assert(compare_precision_v<fp::f<128>, fp::f<256>> == -1);
+  static_assert(compare_precision_v<fp::f<256>, fp::f<128>> == 1);
+
+  static_assert(compare_precision_v<fp::d<128>, fp::d<128>> == 0);
+  static_assert(compare_precision_v<fp::d<128>, fp::d<256>> == -1);
+  static_assert(compare_precision_v<fp::d<256>, fp::d<128>> == 1);
+
+  static_assert(!precision_comparable<fp::f<128>, fp::d<128>>);
+  static_assert(!precision_comparable<fp::f<128>, fp::d<256>>);
+  static_assert(!precision_comparable<fp::d<128>, fp::f<256>>);
+}
+
 } // namespace test::fmia::meta
 
 namespace test::fmia::math {

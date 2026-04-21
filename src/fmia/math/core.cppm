@@ -16,6 +16,7 @@
 module;
 
 #include <cassert>
+#include <climits>
 
 // https://stackoverflow.com/a/76440171
 #if _MSC_VER >= 1934
@@ -244,6 +245,10 @@ concept fixed_precision_integral = fixed_precision_signed_integral<T> || fixed_p
 
 template <typename T>
 concept nonbool_fixed_precision_integral = fixed_precision_integral<T> && !boolean<T>;
+
+template <typename T>
+concept custom_fixed_precision_integral =
+  is_custom_fixed_precision_signed_integral_v<T> || is_custom_fixed_precision_unsigned_integral_v<T>;
 
 } // namespace fmia::meta
 
@@ -548,10 +553,13 @@ template <typename T>
 constexpr bool is_big_decimal_v = is_big_decimal<T>::value;
 
 template <typename T>
+concept fixed_precision_floating_point = ieee754_floating_point<T>;
+
+template <typename T>
 concept arbitrary_precision_floating_point = is_big_decimal_v<T>;
 
 template <typename T>
-concept floating_point = ieee754_floating_point<T> || arbitrary_precision_floating_point<T>;
+concept floating_point = fixed_precision_floating_point<T> || arbitrary_precision_floating_point<T>;
 
 } // namespace fmia::meta
 
@@ -610,6 +618,12 @@ export namespace fmia::meta {
 template <typename T>
 concept arithmetic = integral<T> || floating_point<T>;
 
+template <typename T>
+concept fixed_precision_arithmetic = fixed_precision_integral<T> || fixed_precision_floating_point<T>;
+
+template <typename T>
+concept arbitratry_precision_arithmetic = is_big_integer_v<T> || is_big_decimal_v<T>;
+
 // for a fixed-precision integer type: obtain i/u32 if its precision is smaller than 32 bits, otherwise obtain a
 // fixed-precision integer type that has double precision
 // for a big integer type: obtain itself
@@ -622,6 +636,58 @@ using make_higher_precision = detail::make_higher_precision_selector<T>;
 
 template <typename T>
 using make_higher_precision_t = make_higher_precision<T>::type;
+
+} // namespace fmia::meta
+
+export namespace fmia::meta {
+
+template <typename T>
+constexpr usize precision_bits_v = sizeof(T) * CHAR_BIT;
+
+template <>
+constexpr usize precision_bits_v<i128> = 128;
+
+template <>
+constexpr usize precision_bits_v<u128> = 128;
+
+template <>
+constexpr usize precision_bits_v<f128> = 128;
+
+template <usize Bits>
+constexpr usize precision_bits_v<fixed_precision_integer::i<Bits>> = Bits;
+
+template <usize Bits>
+constexpr usize precision_bits_v<fixed_precision_integer::u<Bits>> = Bits;
+
+template <usize Bits>
+constexpr usize precision_bits_v<ieee754_float::f<Bits>> = Bits;
+
+template <usize Bits>
+constexpr usize precision_bits_v<ieee754_float::d<Bits>> = Bits;
+
+template <typename T, typename U>
+concept precision_comparable =
+  (fixed_precision_integral<T> && fixed_precision_integral<U> && signed_integral<T> == signed_integral<U>)
+  || (ieee754_binary_floating_point<T> && ieee754_binary_floating_point<U>)
+  || (ieee754_decimal_floating_point<T> && ieee754_decimal_floating_point<U>);
+
+template <typename T, typename U>
+  requires precision_comparable<T, U>
+struct compare_precision
+{
+  static constexpr int value = [] {
+    constexpr auto x = precision_bits_v<T>, y = precision_bits_v<U>;
+    if (x < y)
+      return -1;
+    if (x > y)
+      return 1;
+    return 0;
+  }();
+};
+
+template <typename T, typename U>
+  requires precision_comparable<T, U>
+constexpr int compare_precision_v = compare_precision<T, U>::value;
 
 } // namespace fmia::meta
 
@@ -779,7 +845,7 @@ template <meta::fixed_precision_integral T>
     return {{0}, a};
 
   std::vector<int> q(a.size() - b.size() + 1), r(b.size() + 1);
-  std::copy(a.begin() + q.size(), a.end(), r.begin());
+  std::copy(a.begin() + static_cast<typename std::vector<int>::difference_type>(q.size()), a.end(), r.begin());
 
   for (auto i = q.size(); i > 0; --i) {
     std::move_backward(r.begin(), r.end() - 1, r.end());
