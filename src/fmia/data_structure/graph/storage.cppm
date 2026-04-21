@@ -206,6 +206,7 @@ public:
 export namespace fmia::graph {
 
 template <std::integral Vertex, meta::fixed_precision_integral Degree = meta::make_higher_precision_t<Vertex>>
+  requires (meta::compare_precision_v<Vertex, Degree> <= 0)
 struct basic_unweighted_edge_list : public detail::basic_edge_list_base<Vertex, unweighted_edge<Vertex>, Degree>
 {
   constexpr void add_edge(Vertex u, Vertex v) { this->edges_.emplace_back(u, v); }
@@ -215,6 +216,7 @@ template <
   std::integral Vertex, meta::arithmetic Weight,
   meta::fixed_precision_integral Degree = meta::make_higher_precision_t<Vertex>
 >
+  requires (meta::compare_precision_v<Vertex, Degree> <= 0)
 struct basic_weighted_edge_list : public detail::basic_edge_list_base<Vertex, weighted_edge<Vertex, Weight>, Degree>
 {
   using weight_type = Weight;
@@ -242,6 +244,7 @@ struct is_no_cv_basic_edge_list<graph::basic_weighted_edge_list<Vertex, Weight, 
 export namespace fmia::graph {
 
 template <std::integral Vertex, meta::fixed_precision_integral Degree = meta::make_higher_precision_t<Vertex>>
+  requires (meta::compare_precision_v<Vertex, Degree> <= 0)
 class unweighted_edge_list : public detail::edge_list_base<Vertex, unweighted_edge<Vertex>, Degree>
 {
 public:
@@ -256,6 +259,7 @@ template <
   std::integral Vertex, meta::arithmetic Weight,
   meta::fixed_precision_integral Degree = meta::make_higher_precision_t<Vertex>
 >
+  requires (meta::compare_precision_v<Vertex, Degree> <= 0)
 class weighted_edge_list : public detail::edge_list_base<Vertex, weighted_edge<Vertex, Weight>, Degree>
 {
 public:
