@@ -24,7 +24,7 @@ module;
 
 export module fmia.math.core;
 
-// basic arithmetic types and metaprogramming utils
+// core arithmetic types and metaprogramming utils
 
 import std;
 
