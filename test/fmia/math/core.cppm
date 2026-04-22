@@ -29,6 +29,10 @@ namespace test::fmia::meta {
 
 using namespace ::fmia::meta;
 
+} // namespace test::fmia::meta
+
+export namespace test::fmia::meta {
+
 consteval void does_is_boolean_work() noexcept
 {
   static_assert(is_boolean_v<int> == false);
@@ -165,9 +169,9 @@ consteval void does_compare_precision_for_floating_point_work() noexcept
 
 } // namespace test::fmia::meta
 
-namespace test::fmia::math {
+export namespace test::fmia::math {
 
-export void int128_input_with_std_istream() noexcept
+void int128_input_with_std_istream() noexcept
 {
   i128 a, b;
   u128 c, d;
@@ -176,7 +180,7 @@ export void int128_input_with_std_istream() noexcept
 }
 
 // implies test for std::format
-export void int128_output_with_std_ostream_and_std_print() noexcept
+void int128_output_with_std_ostream_and_std_print() noexcept
 {
   i128 a = -30, b = -40;
   u128 c = 30, d = 40;

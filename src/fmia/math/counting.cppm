@@ -23,9 +23,7 @@ import std;
 
 import fmia.math.core;
 
-namespace fmia {
-
-namespace detail {
+namespace fmia::detail {
 
 // count occurrences of digit x in all integers in [0, n]
 // time complexity: O(log n)
@@ -68,9 +66,11 @@ template <typename T>
   return ans + (x == 0);
 }
 
-} // namespace detail
+} // namespace fmia::detail
 
-export template <meta::fixed_precision_integral T>
+export namespace fmia {
+
+template <meta::fixed_precision_integral T>
 [[nodiscard]] constexpr auto count_digit_occurrence(const T& l, const T& r, int x)
 {
   assert(0 <= l && l <= r && 0 <= x && x <= 9);
@@ -83,7 +83,7 @@ export template <meta::fixed_precision_integral T>
 
 // count occurrences of digit x in n
 // time complexity: O(log n)
-export template <meta::fixed_precision_integral T>
+template <meta::fixed_precision_integral T>
 [[nodiscard]] constexpr auto count_digit_occurrence(T n, int x) noexcept
 {
   assert(n >= 0 && 0 <= x && x <= 9);

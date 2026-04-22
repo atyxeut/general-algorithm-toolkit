@@ -21,9 +21,7 @@ import fmia.math.core;
 import fmia.memory.core;
 import fmia.meta;
 
-namespace fmia {
-
-namespace detail {
+namespace fmia::detail {
 
 template <typename Char, typename HashMap, exception_safety E>
 class trie_base
@@ -206,10 +204,6 @@ public:
   }
 };
 
-} // namespace detail
-
-namespace detail {
-
 // Hash must map the given character to [0, DistinctCharCount) without any collisions, otherwise the behavior is
 // undefined
 template <typename Char, usize DistinctCharCount, typename Hash>
@@ -281,19 +275,21 @@ struct trie_normal_hash_map
   };
 };
 
-} // namespace detail
+} // namespace fmia::detail
 
-export template <
+export namespace fmia {
+
+template <
   typename Char, usize DistinctCharCount, std::regular_invocable<Char> Hash,
   exception_safety E = exception_safety::strong
 >
 using trie = detail::trie_base<Char, detail::trie_default_hash_map<Char, DistinctCharCount, Hash>, E>;
 
-export using binary_trie = trie<int, 2, decltype([](int x) constexpr noexcept { return x; })>;
-export using lower_char_trie = trie<char, 26, decltype([](char ch) constexpr noexcept { return ch - 'a'; })>;
-export using upper_char_trie = trie<char, 26, decltype([](char ch) constexpr noexcept { return ch - 'A'; })>;
+using binary_trie = trie<int, 2, decltype([](int x) constexpr noexcept { return x; })>;
+using lower_char_trie = trie<char, 26, decltype([](char ch) constexpr noexcept { return ch - 'a'; })>;
+using upper_char_trie = trie<char, 26, decltype([](char ch) constexpr noexcept { return ch - 'A'; })>;
 
-export template <typename Char, std::regular_invocable<Char> Hash, exception_safety E = exception_safety::strong>
+template <typename Char, std::regular_invocable<Char> Hash, exception_safety E = exception_safety::strong>
 using hash_trie = detail::trie_base<Char, detail::trie_normal_hash_map<Char, Hash, std::unordered_map>, E>;
 
 } // namespace fmia

@@ -168,7 +168,11 @@ using u128 = ::fmia::fixed_precision_integer::u<128>;
 
 // clang-format on
 
-export auto& operator >>(std::istream& istr, u128& n)
+// clang-format off
+
+export {
+
+auto& operator >>(std::istream& istr, u128& n)
 {
   std::string buffer;
   istr >> buffer;
@@ -180,7 +184,7 @@ export auto& operator >>(std::istream& istr, u128& n)
   return istr;
 }
 
-export auto& operator >>(std::istream& istr, i128& n)
+auto& operator >>(std::istream& istr, i128& n)
 {
   std::string buffer;
   istr >> buffer;
@@ -199,7 +203,7 @@ export auto& operator >>(std::istream& istr, i128& n)
   return istr;
 }
 
-export auto& operator <<(std::ostream& ostr, u128 n)
+auto& operator <<(std::ostream& ostr, u128 n)
 {
   if (n == 0) {
     ostr << '0';
@@ -214,7 +218,7 @@ export auto& operator <<(std::ostream& ostr, u128 n)
   return ostr;
 }
 
-export auto& operator <<(std::ostream& ostr, i128 n)
+auto& operator <<(std::ostream& ostr, i128 n)
 {
   if (n == std::numeric_limits<i128>::min())
     ostr << '-' << static_cast<u128>(n);
@@ -225,6 +229,10 @@ export auto& operator <<(std::ostream& ostr, i128 n)
 
   return ostr;
 }
+
+}
+
+// clang-format on
 
 export namespace fmia::meta {
 
@@ -251,9 +259,7 @@ concept custom_fixed_precision_integral =
 
 } // namespace fmia::meta
 
-namespace fmia::meta {
-
-namespace detail {
+namespace fmia::meta::detail {
 
 template <typename T, typename = std::remove_cv_t<T>>
 struct make_signed_selector : std::make_signed<T>
@@ -280,15 +286,19 @@ struct make_signed_selector<T, fixed_precision_integer::u<Bits>> : claim_cv<T, f
 {
 };
 
-} // namespace detail
+} // namespace fmia::meta::detail
 
-export template <fixed_precision_integral T>
+export namespace fmia::meta {
+
+template <fixed_precision_integral T>
 using make_signed = detail::make_signed_selector<T>;
 
-export template <typename T>
+template <typename T>
 using make_signed_t = make_signed<T>::type;
 
-namespace detail {
+} // namespace fmia::meta
+
+namespace fmia::meta::detail {
 
 template <typename T, typename = std::remove_cv_t<T>>
 struct make_unsigned_selector : std::make_unsigned<T>
@@ -315,12 +325,14 @@ struct make_unsigned_selector<T, fixed_precision_integer::u<Bits>> : claim_cv<T,
 {
 };
 
-} // namespace detail
+} // namespace fmia::meta::detail
 
-export template <fixed_precision_integral T>
+export namespace fmia::meta {
+
+template <fixed_precision_integral T>
 using make_unsigned = detail::make_unsigned_selector<T>;
 
-export template <typename T>
+template <typename T>
 using make_unsigned_t = make_unsigned<T>::type;
 
 } // namespace fmia::meta

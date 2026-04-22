@@ -17,7 +17,7 @@ export module fmia.math.equation.linear_diophantine_equation;
 
 // information of equation a1x1 + a2x2 + a3x3 + ... + anxn = c
 
-namespace fmia {
+export namespace fmia {
 
 class linear_diophantine_equation
 {

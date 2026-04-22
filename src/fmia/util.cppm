@@ -22,10 +22,10 @@ export import fmia.util.sort;
 export import fmia.util.std_extension;
 export import fmia.util.tower_of_hanoi;
 
-namespace fmia {
+export namespace fmia {
 
 // same values map to the same rank
-export template <std::ranges::forward_range Range>
+template <std::ranges::forward_range Range>
 [[nodiscard]] constexpr auto compress_coordinates(const Range& range)
 {
   std::vector<std::ranges::range_value_t<Range>> tmp(std::ranges::begin(range), std::ranges::end(range));
@@ -42,7 +42,7 @@ export template <std::ranges::forward_range Range>
 }
 
 // every value maps to a unique rank, smaller index in the original range maps to a lower rank
-export template <std::ranges::input_range Range>
+template <std::ranges::input_range Range>
 [[nodiscard]] constexpr auto compress_coordinates_to_unique(Range&& range)
 {
   const auto n = std::ranges::size(range);

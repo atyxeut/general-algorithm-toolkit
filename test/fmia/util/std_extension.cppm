@@ -19,11 +19,10 @@ module;
 
 export module test.fmia.util.std_extension;
 
-export import fmia.util.std_extension;
-
 import std;
 
 import fmia.memory.core;
+import fmia.util.std_extension;
 
 namespace test::fmia::util {
 

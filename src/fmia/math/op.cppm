@@ -62,6 +62,10 @@ struct is_enum_flag<operator_property> : std::true_type
 
 } // namespace fmia::meta
 
+// clang-format off
+
+export {
+
 [[nodiscard]] constexpr auto operator &(::fmia::operator_property a, ::fmia::operator_property b) noexcept
 {
   return static_cast<::fmia::operator_property>(std::to_underlying(a) & std::to_underlying(b));
@@ -91,6 +95,10 @@ constexpr auto& operator |=(::fmia::operator_property& a, ::fmia::operator_prope
 {
   return a = a | b;
 };
+
+}
+
+// clang-format on
 
 export namespace fmia::meta {
 

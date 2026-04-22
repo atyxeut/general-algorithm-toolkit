@@ -20,15 +20,13 @@ import std;
 import fmia.data_structure.graph.storage;
 import fmia.math;
 
-namespace fmia::graph::shortest_path {
+export namespace fmia::graph::shortest_path {
 
 enum class error : u8 { empty_graph, negative_cycle };
 
 } // namespace fmia::graph::shortest_path
 
-namespace fmia::graph::shortest_path::single_source {
-
-namespace detail {
+namespace fmia::graph::shortest_path::single_source::detail {
 
 // brief explaination for correctness:
 // 1. the shortest path can have at most V - 1 edges
@@ -69,9 +67,11 @@ constexpr auto bellman_ford_impl(const EdgeList& edges, Vertex vertex_count, Ver
   return distance;
 }
 
-} // namespace detail
+} // namespace fmia::graph::shortest_path::single_source::detail
 
-export template <typename Vertex, typename Weight>
+export namespace fmia::graph::shortest_path::single_source {
+
+template <typename Vertex, typename Weight>
 [[nodiscard]] constexpr auto bellman_ford(
   const basic_weighted_edge_list<Vertex, Weight>& edges, Vertex vertex_count, Vertex source
 )
@@ -79,7 +79,7 @@ export template <typename Vertex, typename Weight>
   return detail::bellman_ford_impl(edges, vertex_count, source);
 }
 
-export template <typename Vertex, typename Weight>
+template <typename Vertex, typename Weight>
 [[nodiscard]] constexpr auto bellman_ford(const weighted_edge_list<Vertex, Weight>& edges, Vertex source)
 {
   return detail::bellman_ford_impl(edges, edges.vertex_size(), source);
@@ -95,7 +95,7 @@ export template <typename Vertex, typename Weight>
 //
 // this implementation uses a queue to hold the vertices, guarantees to be not worse than the vanilla bellman-ford,
 // because a normal queue does not affect the original update order of the bellman-ford, and is faster in average cases
-export template <meta::graph T, typename Vertex = T::vertex_type, typename Weight = T::weight_type>
+template <meta::graph T, typename Vertex = T::vertex_type, typename Weight = T::weight_type>
 [[nodiscard]] constexpr auto bellman_ford_queue_optimized(const T& g, Vertex source)
   -> std::expected<std::vector<Weight>, error>
 {
@@ -160,7 +160,7 @@ export template <meta::graph T, typename Vertex = T::vertex_type, typename Weigh
 // Parallel Asynchronous Label-Correcting Methods for Shortest Paths
 // Dimitri P. Bertsekas, Francesca Guerriero, and Roberto Musmanno
 // https://web.mit.edu/dimitrib/www/parallelsp.pdf
-export template <meta::graph T, typename Vertex = T::vertex_type, typename Weight = T::weight_type>
+template <meta::graph T, typename Vertex = T::vertex_type, typename Weight = T::weight_type>
 [[nodiscard]] constexpr auto bellman_ford_deque_optimized(const T& g, Vertex source)
   -> std::expected<std::vector<Weight>, error>
 {
@@ -220,6 +220,6 @@ export template <meta::graph T, typename Vertex = T::vertex_type, typename Weigh
 
 } // namespace fmia::graph::shortest_path::single_source
 
-namespace fmia::graph::shortest_path::all_pairs {
+export namespace fmia::graph::shortest_path::all_pairs {
 
 }

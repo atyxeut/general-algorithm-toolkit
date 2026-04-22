@@ -17,25 +17,27 @@ export module fmia.meta.cv_qualifier;
 
 import std;
 
-namespace fmia::meta {
+export namespace fmia::meta {
 
-export template <typename T>
+template <typename T>
 struct has_cv : std::bool_constant<std::is_const_v<T> || std::is_volatile_v<T>>
 {
 };
 
-export template <typename T>
+template <typename T>
 constexpr bool has_cv_v = has_cv<T>::value;
 
-export template <typename T>
+template <typename T>
 struct is_cv : std::bool_constant<std::is_const_v<T> && std::is_volatile_v<T>>
 {
 };
 
-export template <typename T>
+template <typename T>
 constexpr bool is_cv_v = is_cv<T>::value;
 
-namespace detail {
+} // namespace fmia::meta
+
+namespace fmia::meta::detail {
 
 template <typename From, typename To, bool = std::is_const_v<From>, bool = std::is_volatile_v<From>>
 struct claim_cv_selector;
@@ -65,13 +67,15 @@ struct claim_cv_selector<From, To, false, false>
   using type = To;
 };
 
-} // namespace detail
+} // namespace fmia::meta::detail
+
+export namespace fmia::meta {
 
 // extract the cv-qualifiers of From and apply them to To
-export template <typename From, typename To>
+template <typename From, typename To>
 using claim_cv = detail::claim_cv_selector<From, To>;
 
-export template <typename From, typename To>
+template <typename From, typename To>
 using claim_cv_t = claim_cv<From, To>::type;
 
 } // namespace fmia::meta

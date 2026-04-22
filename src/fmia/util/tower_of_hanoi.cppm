@@ -42,12 +42,11 @@ constexpr auto peg_name_lower = "abc";
 
 } // namespace fmia::tower_of_hanoi
 
-namespace fmia::tower_of_hanoi::get_move_cnt {
+export namespace fmia::tower_of_hanoi::get_move_cnt {
 
 // initially all disks stack on one peg `from`, finally they all stack on one peg `to`
-export [[nodiscard]] constexpr auto from_one_to_one_form(u32 disk_cnt) noexcept(
-  noexcept((move_cnt_type(1) << disk_cnt) - 1)
-) -> move_cnt_type
+[[nodiscard]] constexpr auto from_one_to_one_case(u32 disk_cnt) noexcept(noexcept((move_cnt_type(1) << disk_cnt) - 1))
+  -> move_cnt_type
 {
   // denote the moves of a problem regarding n disks by T(n)
   // 1. to move disk n to `to`, we can first move disk n - 1 to 1 the auxiliary (third) peg, from peg `from`
@@ -70,9 +69,9 @@ export [[nodiscard]] constexpr auto from_one_to_one_form(u32 disk_cnt) noexcept(
 
 // initially all disks stack scatteredly, but finally they all stack on one peg `to`
 // from_list[i]: the (i + 1)-th disk's initial peg
-export [[nodiscard]] constexpr auto from_different_to_one_form(
-  u32 disk_cnt, std::span<const u32> from_list, u32 to
-) noexcept(noexcept(from_one_to_one_form(disk_cnt))) -> move_cnt_type
+[[nodiscard]] constexpr auto from_different_to_one_case(u32 disk_cnt, std::span<const u32> from_list, u32 to) noexcept(
+  noexcept(from_one_to_one_case(disk_cnt))
+) -> move_cnt_type
 {
   if (disk_cnt == 0)
     return 0;
@@ -80,42 +79,46 @@ export [[nodiscard]] constexpr auto from_different_to_one_form(
   // if the largest is already in position, just deal with the disks left
   const u32 from = from_list[disk_cnt - 1];
   if (from == to)
-    return from_different_to_one_form(disk_cnt - 1, from_list, to);
+    return from_different_to_one_case(disk_cnt - 1, from_list, to);
 
   // 1. have to move all other disks to the auxiliary peg before the largest one is able to be moved to peg `to`
   // 2. after moving the largest one, move the remaining from the auxiliary peg to peg `to`, this problem has "from
   //    one to one" form
   const u32 aux = peg_cnt - from - to;
-  return from_different_to_one_form(disk_cnt - 1, from_list, aux) + 1 + from_one_to_one_form(disk_cnt - 1);
+  return from_different_to_one_case(disk_cnt - 1, from_list, aux) + 1 + from_one_to_one_case(disk_cnt - 1);
 }
 
 // initially all disks stack on one peg `from`, but finally they stack scatteredly
 // to_list[i]: the (i + 1)-th disk's destination peg
-export [[nodiscard]] constexpr auto from_one_to_different_form(
-  u32 disk_cnt, u32 from, std::span<const u32> to_list
-) noexcept(noexcept(from_one_to_one_form(disk_cnt))) -> move_cnt_type
+[[nodiscard]] constexpr auto from_one_to_different_case(u32 disk_cnt, u32 from, std::span<const u32> to_list) noexcept(
+  noexcept(from_one_to_one_case(disk_cnt))
+) -> move_cnt_type
 {
   if (disk_cnt == 0)
     return 0;
 
   const u32 to = to_list[disk_cnt - 1];
   if (from == to)
-    return from_one_to_different_form(disk_cnt - 1, from, to_list);
+    return from_one_to_different_case(disk_cnt - 1, from, to_list);
 
   const u32 aux = peg_cnt - from - to;
-  return from_one_to_one_form(disk_cnt - 1) + 1 + from_one_to_different_form(disk_cnt - 1, aux, to_list);
+  return from_one_to_one_case(disk_cnt - 1) + 1 + from_one_to_different_case(disk_cnt - 1, aux, to_list);
 }
 
+} // namespace fmia::tower_of_hanoi::get_move_cnt
+
+namespace fmia::tower_of_hanoi::get_move_cnt::detail {
+
 // move the largest disk from peg `from` to peg `to` using only one step (in most cases this is optimal)
-[[nodiscard]] constexpr auto general_form_one_step_strategy(
+[[nodiscard]] constexpr auto general_case_one_step_strategy(
   u32 disk_cnt, std::span<const u32> from_list, std::span<const u32> to_list
-) noexcept(noexcept(from_one_to_one_form(disk_cnt))) -> move_cnt_type
+) noexcept(noexcept(from_one_to_one_case(disk_cnt))) -> move_cnt_type
 {
   // 1. move disks above the largest disk n and on peg `to[n]` to peg `aux`, so that disk n can move
   // 2. move disk n to the destination, then move the remaining n - 1 disks on peg `aux` to their destinations
   const u32 aux = peg_cnt - from_list[disk_cnt - 1] - to_list[disk_cnt - 1];
-  return from_different_to_one_form(disk_cnt - 1, from_list, aux) + 1
-         + from_one_to_different_form(disk_cnt - 1, aux, to_list);
+  return from_different_to_one_case(disk_cnt - 1, from_list, aux) + 1
+         + from_one_to_different_case(disk_cnt - 1, aux, to_list);
 }
 
 // moving the largest disk n first from peg `from` to peg `aux`, then to `to`, using two steps, is sometimes better,
@@ -140,9 +143,9 @@ export [[nodiscard]] constexpr auto from_one_to_different_form(
 // move 2 from C to A
 // move 1 from B to A
 // move 3 from B to A (the second move)
-[[nodiscard]] constexpr auto general_form_two_step_strategy(
+[[nodiscard]] constexpr auto general_case_two_step_strategy(
   u32 disk_cnt, std::span<const u32> from_list, std::span<const u32> to_list
-) noexcept(noexcept(from_one_to_one_form(disk_cnt))) -> move_cnt_type
+) noexcept(noexcept(from_one_to_one_case(disk_cnt))) -> move_cnt_type
 {
   // 1. clear disks above the largest disk n and on peg `aux`, move them to peg `to[n]`
   // 2. move disk n to peg `aux` (the first move)
@@ -151,14 +154,18 @@ export [[nodiscard]] constexpr auto from_one_to_different_form(
   // 5. move the remaining n - 1 disks on peg `from[n]` to their destinations
   const u32 from = from_list[disk_cnt - 1];
   const u32 to = to_list[disk_cnt - 1];
-  return from_different_to_one_form(disk_cnt - 1, from_list, to) + 1 + from_one_to_one_form(disk_cnt - 1) + 1
-         + from_one_to_different_form(disk_cnt - 1, from, to_list);
+  return from_different_to_one_case(disk_cnt - 1, from_list, to) + 1 + from_one_to_one_case(disk_cnt - 1) + 1
+         + from_one_to_different_case(disk_cnt - 1, from, to_list);
 }
 
+} // namespace fmia::tower_of_hanoi::get_move_cnt::detail
+
+export namespace fmia::tower_of_hanoi::get_move_cnt {
+
 // initially all disks stack scatteredly, and finally they also stack scatteredly
-export [[nodiscard]] constexpr auto general_form(
+[[nodiscard]] constexpr auto general_case(
   u32 disk_cnt, std::span<const u32> from_list, std::span<const u32> to_list
-) noexcept(noexcept(from_one_to_one_form(disk_cnt))) -> move_cnt_type
+) noexcept(noexcept(from_one_to_one_case(disk_cnt))) -> move_cnt_type
 {
   if (disk_cnt == 0)
     return 0;
@@ -166,17 +173,17 @@ export [[nodiscard]] constexpr auto general_form(
   const u32 from = from_list[disk_cnt - 1];
   const u32 to = to_list[disk_cnt - 1];
   if (from == to)
-    return general_form(disk_cnt - 1, from_list, to_list);
+    return general_case(disk_cnt - 1, from_list, to_list);
 
   return std::min(
-    general_form_one_step_strategy(disk_cnt, from_list, to_list),
-    general_form_two_step_strategy(disk_cnt, from_list, to_list)
+    detail::general_case_one_step_strategy(disk_cnt, from_list, to_list),
+    detail::general_case_two_step_strategy(disk_cnt, from_list, to_list)
   );
 }
 
 } // namespace fmia::tower_of_hanoi::get_move_cnt
 
-namespace fmia::tower_of_hanoi::print_moves {
+namespace fmia::tower_of_hanoi::print_moves::detail {
 
 void move(u32 disk, u32 from, u32 to, bool upper_case = true)
 {
@@ -184,76 +191,80 @@ void move(u32 disk, u32 from, u32 to, bool upper_case = true)
   std::println("move {} from {} to {}", disk, peg_name[from], peg_name[to]);
 }
 
-export void from_one_to_one_form(u32 disk_cnt, u32 from, u32 to)
+} // namespace fmia::tower_of_hanoi::print_moves::detail
+
+export namespace fmia::tower_of_hanoi::print_moves {
+
+void from_one_to_one_case(u32 disk_cnt, u32 from, u32 to)
 {
   if (disk_cnt == 0)
     return;
 
   const u32 aux = peg_cnt - from - to;
-  from_one_to_one_form(disk_cnt - 1, from, aux);
-  move(disk_cnt, from, to);
-  from_one_to_one_form(disk_cnt - 1, aux, to);
+  from_one_to_one_case(disk_cnt - 1, from, aux);
+  detail::move(disk_cnt, from, to);
+  from_one_to_one_case(disk_cnt - 1, aux, to);
 }
 
-export void from_different_to_one_form(u32 disk_cnt, std::span<const u32> from_list, u32 to)
+void from_different_to_one_case(u32 disk_cnt, std::span<const u32> from_list, u32 to)
 {
   if (disk_cnt == 0)
     return;
 
   const u32 from = from_list[disk_cnt - 1];
   if (from == to) {
-    from_different_to_one_form(disk_cnt - 1, from_list, to);
+    from_different_to_one_case(disk_cnt - 1, from_list, to);
     return;
   }
 
   const u32 aux = peg_cnt - from - to;
-  from_different_to_one_form(disk_cnt - 1, from_list, aux);
-  move(disk_cnt, from, to);
-  from_one_to_one_form(disk_cnt - 1, aux, to);
+  from_different_to_one_case(disk_cnt - 1, from_list, aux);
+  detail::move(disk_cnt, from, to);
+  from_one_to_one_case(disk_cnt - 1, aux, to);
 }
 
-export void from_one_to_different_form(u32 disk_cnt, u32 from, std::span<const u32> to_list)
+void from_one_to_different_case(u32 disk_cnt, u32 from, std::span<const u32> to_list)
 {
   if (disk_cnt == 0)
     return;
 
   const u32 to = to_list[disk_cnt - 1];
   if (from == to) {
-    from_one_to_different_form(disk_cnt - 1, from, to_list);
+    from_one_to_different_case(disk_cnt - 1, from, to_list);
     return;
   }
 
   const u32 aux = peg_cnt - from - to;
-  from_one_to_one_form(disk_cnt - 1, from, aux);
-  move(disk_cnt, from, to);
-  from_one_to_different_form(disk_cnt - 1, aux, to_list);
+  from_one_to_one_case(disk_cnt - 1, from, aux);
+  detail::move(disk_cnt, from, to);
+  from_one_to_different_case(disk_cnt - 1, aux, to_list);
 }
 
-export void general_form(u32 disk_cnt, std::span<const u32> from_list, std::span<const u32> to_list)
+void general_case(u32 disk_cnt, std::span<const u32> from_list, std::span<const u32> to_list)
 {
   if (disk_cnt == 0)
     return;
 
   const u32 from = from_list[disk_cnt - 1], to = to_list[disk_cnt - 1];
   if (from == to) {
-    general_form(disk_cnt - 1, from_list, to_list);
+    general_case(disk_cnt - 1, from_list, to_list);
     return;
   }
 
   const u32 aux = peg_cnt - from - to;
-  const auto one_step_strategy_cost = get_move_cnt::general_form_one_step_strategy(disk_cnt, from_list, to_list);
-  const auto two_step_strategy_cost = get_move_cnt::general_form_two_step_strategy(disk_cnt, from_list, to_list);
-  if (one_step_strategy_cost <= two_step_strategy_cost) {
-    from_different_to_one_form(disk_cnt - 1, from_list, aux);
-    move(disk_cnt, from, to);
-    from_one_to_different_form(disk_cnt - 1, aux, to_list);
+  const auto cost1 = get_move_cnt::detail::general_case_one_step_strategy(disk_cnt, from_list, to_list);
+  const auto cost2 = get_move_cnt::detail::general_case_two_step_strategy(disk_cnt, from_list, to_list);
+  if (cost1 <= cost2) {
+    from_different_to_one_case(disk_cnt - 1, from_list, aux);
+    detail::move(disk_cnt, from, to);
+    from_one_to_different_case(disk_cnt - 1, aux, to_list);
   }
   else {
-    from_different_to_one_form(disk_cnt - 1, from_list, to);
-    move(disk_cnt, from, aux);
-    from_one_to_one_form(disk_cnt - 1, to, from);
-    move(disk_cnt, aux, to);
-    from_one_to_different_form(disk_cnt - 1, from, to_list);
+    from_different_to_one_case(disk_cnt - 1, from_list, to);
+    detail::move(disk_cnt, from, aux);
+    from_one_to_one_case(disk_cnt - 1, to, from);
+    detail::move(disk_cnt, aux, to);
+    from_one_to_different_case(disk_cnt - 1, from, to_list);
   }
 }
 

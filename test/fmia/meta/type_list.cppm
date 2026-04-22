@@ -79,9 +79,13 @@ using indexed_type_list_4 = indexed_type_list<std::make_index_sequence<length_v<
 using indexed_type_list_5 = indexed_type_list<std::make_index_sequence<length_v<type_list_5>>, type_list_5>;
 using indexed_type_list_6 = indexed_type_list<std::make_index_sequence<length_v<type_list_6>>, type_list_6>;
 
+} // namespace test::fmia::meta
+
+export namespace test::fmia::meta {
+
 // clang-format off
 
-export consteval void does_lookup_work() noexcept
+consteval void does_lookup_work() noexcept
 {
   static_assert(std::same_as<lookup_t<2, indexed_type_list_1>, indexed_type<2, std::vector<int>>>);
   static_assert(std::same_as<lookup_t<0, indexed_type_list_2>, indexed_type<0, std::string>>);
@@ -96,7 +100,7 @@ export consteval void does_lookup_work() noexcept
 
 // clang-format on
 
-export consteval void does_cons_work() noexcept
+consteval void does_cons_work() noexcept
 {
   // cons for meta::type_list
   static_assert(std::same_as<cons_t<int, type_list_1>, type_list<int, double, float, std::vector<int>, long long>>);
@@ -120,7 +124,7 @@ export consteval void does_cons_work() noexcept
   static_assert(std::same_as<cons_t<indexed_type<9, void>, indexed_type_list_3>, indexed_type_list_3_after_cons>);
 }
 
-export consteval void does_snoc_work() noexcept
+consteval void does_snoc_work() noexcept
 {
   // snoc for meta::type_list
   static_assert(std::same_as<snoc_t<int, type_list_1>, type_list<double, float, std::vector<int>, long long, int>>);
@@ -144,7 +148,7 @@ export consteval void does_snoc_work() noexcept
   static_assert(std::same_as<snoc_t<indexed_type<9, void>, indexed_type_list_3>, indexed_type_list_3_after_snoc>);
 }
 
-export consteval void does_replicate_work() noexcept
+consteval void does_replicate_work() noexcept
 {
   using replicateed_0_time_type_list = empty_type_list;
   static_assert(std::same_as<replicate_t<0, void>, replicateed_0_time_type_list>);
@@ -153,7 +157,9 @@ export consteval void does_replicate_work() noexcept
   static_assert(std::same_as<replicate_t<5, int>, int_replicateed_5_times_type_list>);
 }
 
-namespace detail {
+} // namespace test::fmia::meta
+
+namespace test::fmia::meta::detail {
 
 template <list_of_types>
 struct huge_concat_test_helper;
@@ -166,9 +172,11 @@ struct huge_concat_test_helper<type_list<Ts...>> : concat<Ts...>
 template <list_of_types T>
 using huge_concat_test_helper_t = huge_concat_test_helper<T>::type;
 
-} // namespace detail
+} // namespace test::fmia::meta::detail
 
-export consteval void does_concat_work() noexcept
+export namespace test::fmia::meta {
+
+consteval void does_concat_work() noexcept
 {
   static_assert(std::same_as<concat_t<empty_type_list>, empty_type_list>);
   static_assert(std::same_as<concat_t<type_list_2>, type_list_2>);
@@ -226,7 +234,7 @@ export consteval void does_concat_work() noexcept
   static_assert(concat_with_duplication_fails.operator ()<list_1, list_3>());
 }
 
-export consteval void does_reverse_work() noexcept
+consteval void does_reverse_work() noexcept
 {
   using reversed_empty_type_list = empty_type_list;
   static_assert(std::same_as<reverse_t<empty_type_list>, reversed_empty_type_list>);
@@ -238,7 +246,7 @@ export consteval void does_reverse_work() noexcept
   static_assert(std::same_as<reverse_t<type_list_2>, reversed_type_list_of_2>);
 }
 
-export consteval void does_init_work() noexcept
+consteval void does_init_work() noexcept
 {
   // force a template substitution to make `requires` work
   auto test_empty_list = []<typename T> consteval noexcept {
@@ -262,7 +270,7 @@ export consteval void does_init_work() noexcept
   static_assert(std::same_as<init_t<indexed_type_list_2>, init_indexed_type_list_of_2> == true);
 }
 
-export consteval void does_take_work() noexcept
+consteval void does_take_work() noexcept
 {
   using take_0_type_list_of_empty = empty_type_list;
   static_assert(std::same_as<take_t<0, empty_type_list>, take_0_type_list_of_empty>);
@@ -280,7 +288,7 @@ export consteval void does_take_work() noexcept
   static_assert(std::same_as<take_t<6, type_list_5>, take_6_type_list_of_5>);
 }
 
-export consteval void does_take_end_work() noexcept
+consteval void does_take_end_work() noexcept
 {
   using take_0_type_list_of_empty_from_end = empty_type_list;
   static_assert(std::same_as<take_end_t<0, empty_type_list>, take_0_type_list_of_empty_from_end>);
@@ -298,7 +306,7 @@ export consteval void does_take_end_work() noexcept
   static_assert(std::same_as<take_end_t<6, type_list_5>, take_6_type_list_of_5_from_end>);
 }
 
-export consteval void does_drop_work() noexcept
+consteval void does_drop_work() noexcept
 {
   using dropped_0_type_list_of_empty = empty_type_list;
   static_assert(std::same_as<drop_t<0, empty_type_list>, dropped_0_type_list_of_empty>);
@@ -316,7 +324,7 @@ export consteval void does_drop_work() noexcept
   static_assert(std::same_as<drop_t<3, type_list_2>, dropped_3_type_list_of_2>);
 }
 
-export consteval void does_drop_end_work() noexcept
+consteval void does_drop_end_work() noexcept
 {
   using dropped_0_type_list_of_empty_from_end = empty_type_list;
   static_assert(std::same_as<drop_end_t<0, empty_type_list>, dropped_0_type_list_of_empty_from_end>);
@@ -337,7 +345,7 @@ export consteval void does_drop_end_work() noexcept
   static_assert(std::same_as<drop_end_t<2, type_list_3>, dropped_2_type_list_of_3_from_end>);
 }
 
-export consteval void does_take_while_work() noexcept
+consteval void does_take_while_work() noexcept
 {
   using take_while_type_list_of_empty_list = empty_type_list;
   static_assert(std::same_as<take_while_t<std::is_integral, empty_type_list>, take_while_type_list_of_empty_list>);
@@ -361,7 +369,7 @@ export consteval void does_take_while_work() noexcept
   static_assert(std::same_as<take_while_t<std::is_floating_point, type_list_5>, take_while_type_list_of_5_2>);
 }
 
-export consteval void does_take_while_end_work() noexcept
+consteval void does_take_while_end_work() noexcept
 {
   using take_while_type_list_of_empty_list_from_end = empty_type_list;
   static_assert(
@@ -391,7 +399,7 @@ export consteval void does_take_while_end_work() noexcept
   );
 }
 
-export consteval void does_drop_while_work() noexcept
+consteval void does_drop_while_work() noexcept
 {
   using drop_while_type_list_of_1 = type_list<double, float, std::vector<int>, long long>;
   static_assert(std::same_as<drop_while_t<std::is_integral, type_list_1>, drop_while_type_list_of_1>);
@@ -412,7 +420,7 @@ export consteval void does_drop_while_work() noexcept
   static_assert(std::same_as<drop_while_t<std::is_floating_point, type_list_5>, drop_while_type_list_of_5>);
 }
 
-export consteval void does_drop_while_end_work() noexcept
+consteval void does_drop_while_end_work() noexcept
 {
   using drop_while_type_list_of_1_from_end = type_list<double, float, std::vector<int>>;
   static_assert(std::same_as<drop_while_end_t<std::is_integral, type_list_1>, drop_while_type_list_of_1_from_end>);
@@ -435,7 +443,7 @@ export consteval void does_drop_while_end_work() noexcept
   );
 }
 
-export consteval void does_filter_work() noexcept
+consteval void does_filter_work() noexcept
 {
   using filtered_type_list_of_5_1 =
     type_list<int, char, volatile unsigned long long, char, unsigned char, signed char, short>;
@@ -454,7 +462,7 @@ export consteval void does_filter_work() noexcept
   static_assert(std::same_as<filter_t<std::is_signed, type_list_6>, filtered_type_list_of_6>);
 }
 
-export consteval void does_keep_work() noexcept
+consteval void does_keep_work() noexcept
 {
   using keep_only_int_type_list_of_empty = empty_type_list;
   static_assert(std::same_as<keep_t<int, empty_type_list>, keep_only_int_type_list_of_empty>);
@@ -472,7 +480,7 @@ export consteval void does_keep_work() noexcept
   static_assert(std::same_as<keep_t<char, type_list_5>, keep_only_char_type_list_of_5>);
 }
 
-export consteval void does_remove_work() noexcept
+consteval void does_remove_work() noexcept
 {
   using remove_all_int_type_list_of_empty = empty_type_list;
   static_assert(std::same_as<remove_t<int, empty_type_list>, remove_all_int_type_list_of_empty>);
@@ -493,7 +501,7 @@ export consteval void does_remove_work() noexcept
   static_assert(std::same_as<remove_t<char, type_list_5>, remove_all_char_type_list_of_5>);
 }
 
-export consteval void does_transform_work() noexcept
+consteval void does_transform_work() noexcept
 {
   using type_list_1_after_add_const = type_list<const double, const float, const std::vector<int>, const long long>;
   static_assert(std::same_as<transform_t<std::add_const, type_list_1>, type_list_1_after_add_const>);
@@ -503,7 +511,7 @@ export consteval void does_transform_work() noexcept
   static_assert(std::same_as<transform_t<std::make_unsigned, type_list_4>, type_list_4_after_make_unsigned>);
 }
 
-export consteval void does_any_work() noexcept
+consteval void does_any_work() noexcept
 {
   static_assert(any_v<std::is_integral, empty_type_list> == false);
   static_assert(any_v<std::is_integral, type_list_1> == true);
@@ -513,7 +521,7 @@ export consteval void does_any_work() noexcept
   static_assert(any_v<std::is_unsigned, type_list_5> == true);
 }
 
-export consteval void does_none_work() noexcept
+consteval void does_none_work() noexcept
 {
   static_assert(none_v<std::is_integral, empty_type_list> == true);
   static_assert(none_v<std::is_integral, type_list_1> == false);
@@ -523,7 +531,7 @@ export consteval void does_none_work() noexcept
   static_assert(none_v<std::is_unsigned, type_list_5> == false);
 }
 
-export consteval void does_all_work() noexcept
+consteval void does_all_work() noexcept
 {
   static_assert(all_v<std::is_integral, empty_type_list> == false);
   static_assert(all_v<std::is_integral, type_list_1> == false);
@@ -533,7 +541,7 @@ export consteval void does_all_work() noexcept
   static_assert(all_v<std::is_signed, type_list_4> == true);
 }
 
-export consteval void does_has_any_work() noexcept
+consteval void does_has_any_work() noexcept
 {
   static_assert(has_any_v<double, empty_type_list> == false);
   static_assert(has_any_v<double, type_list_1> == true);
@@ -542,7 +550,7 @@ export consteval void does_has_any_work() noexcept
   static_assert(has_any_v<int, indexed_type_list_2> == false);
 }
 
-export consteval void does_has_none_work() noexcept
+consteval void does_has_none_work() noexcept
 {
   static_assert(has_none_v<double, empty_type_list> == true);
   static_assert(has_none_v<int, type_list_1> == true);
@@ -550,10 +558,6 @@ export consteval void does_has_none_work() noexcept
   static_assert(has_none_v<int, indexed_type_list_1> == true);
   static_assert(has_none_v<int, indexed_type_list_3> == false);
 }
-
-} // namespace test::fmia::meta
-
-export namespace test::fmia::meta {
 
 consteval void does_is_predicate_work() noexcept
 {

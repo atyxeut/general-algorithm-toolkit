@@ -75,12 +75,20 @@ void print(std::ostream& ostr, const std::pair<T1, T2>& p, Delim&& delim = std::
 
 } // namespace fmia
 
-export template <typename T1, typename T2>
+// clang-format off
+
+export {
+
+template <typename T1, typename T2>
 auto& operator <<(std::ostream& ostr, const std::pair<T1, T2>& p)
 {
   ::fmia::print(ostr, p);
   return ostr;
 }
+
+}
+
+// clang-format on
 
 export namespace fmia {
 
@@ -97,16 +105,22 @@ void print(std::ostream& ostr, const std::tuple<Ts...>& t, Delim&& delim = std::
 
 } // namespace fmia
 
-export template <typename... Ts>
+// clang-format off
+
+export {
+
+template <typename... Ts>
 std::ostream& operator <<(std::ostream& ostr, const std::tuple<Ts...>& t)
 {
   ::fmia::print(ostr, t);
   return ostr;
 }
 
-namespace fmia::meta::legacy::cpp17 {
+}
 
-namespace detail {
+// clang-format on
+
+namespace fmia::meta::legacy::cpp17::detail {
 
 template <typename, typename = void>
 struct is_std_ostream_interactable_impl : std::false_type
@@ -119,15 +133,17 @@ struct is_std_ostream_interactable_impl<T, std::void_t<decltype(std::declval<std
 {
 };
 
-} // namespace detail
+} // namespace fmia::meta::legacy::cpp17::detail
+
+export namespace fmia::meta::legacy::cpp17 {
 
 // check if T has an overload of operator << of std::ostream&
 // to make fmia::meta::is_std_ostream_interactable<...>::value evaluate to true, the candidate overload must be already
 // defined above it
-export template <typename T>
+template <typename T>
 using is_std_ostream_interactable = detail::is_std_ostream_interactable_impl<T>;
 
-export template <typename T>
+template <typename T>
 constexpr bool is_std_ostream_interactable_v = is_std_ostream_interactable<T>::value;
 
 } // namespace fmia::meta::legacy::cpp17
@@ -141,11 +157,11 @@ concept std_ostream_interactable = requires(std::ostream& ostr, T t) { ostr << t
 
 } // namespace fmia::meta
 
-namespace fmia {
+export namespace fmia {
 
 // for a range whose elements can be printed by std::ostream by default
 // e.g. std::vector<int>, std::vector<std::string>
-export template <
+template <
   std::ranges::input_range Range, std::convertible_to<std::string> Delim = std::string,
   typename Elem = std::ranges::range_value_t<Range>
 >
@@ -163,7 +179,7 @@ std::size_t print(std::ostream& ostr, Range&& range, Delim&& delim = std::string
 
 // for a range whose elements can not be printed by std::ostream by default
 // e.g. std::vector<std::array<int, 4>>, std::vector<std::pair<int, int>>
-export template <
+template <
   std::ranges::input_range Range, std::convertible_to<std::string> Delim = std::string,
   typename Elem = std::ranges::range_value_t<Range>
 >
@@ -183,7 +199,7 @@ std::size_t print(std::ostream& ostr, Range&& range, Delim&& delim = std::string
   return cur_dim + 1;
 }
 
-export template <meta::multidimentional_cstyle_array T, std::convertible_to<std::string> Delim = std::string>
+template <meta::multidimentional_cstyle_array T, std::convertible_to<std::string> Delim = std::string>
 void print(std::ostream& ostr, const T& arr, Delim&& delim = std::string(1, ' '), bool new_line = false)
 {
   for (auto it = std::begin(arr), it_end = std::end(arr); it != it_end; ++it) {
@@ -198,8 +214,12 @@ void print(std::ostream& ostr, const T& arr, Delim&& delim = std::string(1, ' ')
 
 } // namespace fmia
 
+// clang-format off
+
+export {
+
 // avoid ambiguous overloads when Range is std::string&, int[2][3], ...
-export template <
+template <
   std::ranges::input_range Range,
   typename = std::enable_if_t<!::fmia::meta::legacy::cpp17::is_std_ostream_interactable_v<Range>>
 >
@@ -211,7 +231,7 @@ auto& operator <<(std::ostream& ostr, Range&& range)
 
 // C-style arrays can decay and be output directly as a pointer, thus need a specific overload
 // this overload covers multidimentional arrays
-export template <typename T, std::size_t N>
+template <typename T, std::size_t N>
   requires (!std::same_as<std::remove_cv_t<T>, char>)
 auto& operator <<(std::ostream& ostr, const T (&arr)[N])
 {
@@ -219,9 +239,11 @@ auto& operator <<(std::ostream& ostr, const T (&arr)[N])
   return ostr;
 }
 
-namespace fmia {
+}
 
-namespace detail {
+// clang-format on
+
+namespace fmia::detail {
 
 template <typename, std::size_t...>
 struct array_impl;
@@ -237,11 +259,13 @@ struct array_impl<T, Dim, Dims...> : array_impl<typename array_impl<T, Dims...>:
 {
 };
 
-} // namespace detail
+} // namespace fmia::detail
+
+export namespace fmia {
 
 // fmia::array<int, 3, 5, 2> arr3d {};
 // same as: std::array<std::array<std::array<int, 2>, 5>, 3> arr3d {};
-export template <typename T, std::size_t... Dims>
+template <typename T, std::size_t... Dims>
 using array = detail::array_impl<T, Dims...>::type;
 
 } // namespace fmia
@@ -297,9 +321,7 @@ template <typename Elem, std::size_t... Dims, typename T>
 
 } // namespace fmia
 
-namespace fmia {
-
-namespace detail {
+namespace fmia::detail {
 
 template <typename, std::size_t DimCnt, typename>
   requires (DimCnt != 0)
@@ -324,20 +346,24 @@ public:
   using type = std::vector<T, meta::cur_dim_allocator_t<T, meta::type_list<Allocator>>>;
 };
 
-} // namespace detail
+} // namespace fmia::detail
+
+export namespace fmia {
 
 // fmia::vector<int> vec1d;
 // same as: std::vector<int> vec1d;
 //
 // fmia::vector<int, 4> vec4d;
 // same as: std::vector<std::vector<std::vector<std::vector<int>>>> vec4d;
-export template <
+template <
   typename T, std::size_t DimCnt = 1, typename InnermostDimAllocator = std_allocator_tag, typename... Allocators
 >
   requires (sizeof...(Allocators) < DimCnt)
 using vector = detail::vector_impl<T, DimCnt, meta::type_list<InnermostDimAllocator, Allocators...>>::type;
 
-namespace detail {
+} // namespace fmia
+
+namespace fmia::detail {
 
 template <typename Elem, typename AllocatorList, typename Dim, typename... Ts>
 [[nodiscard]] constexpr auto make_vector_impl(Dim first_dim_size, Ts&&... args)
@@ -362,7 +388,9 @@ template <typename Elem, typename AllocatorList, typename Dim, typename... Ts>
   }
 }
 
-} // namespace detail
+} // namespace fmia::detail
+
+export namespace fmia {
 
 // auto vec3d = fmia::make_vector<int>(x, y, z, 1);
 // same as: auto vec3d = std::vector<std::vector<std::vector<int>>>(
@@ -375,7 +403,7 @@ template <typename Elem, typename AllocatorList, typename Dim, typename... Ts>
 //   std::ranges::for_each(vec, [&sum](int elem) { return sum += elem; });
 //   return sum;
 // }(fmia::make_vector<int>(10, -1)) << "\n";
-export template <
+template <
   typename Elem, typename InnermostDimAllocator = std_allocator_tag, typename... Allocators, std::integral Dim,
   typename... Ts
 >
