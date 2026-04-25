@@ -48,3 +48,4 @@ end
 
 includes("src")
 includes("test")
+includes("benchmark")

@@ -19,3 +19,6 @@
 
 !test
 !test/**
+
+!benchmark
+!benchmark/**
