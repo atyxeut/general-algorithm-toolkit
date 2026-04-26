@@ -18,13 +18,13 @@ import shutil
 import subprocess
 from pathlib import Path
 
-# > python3 init.py llvm
+# > init.py llvm
 #   specify `llvm` toolchain and build in debug mode (default)
-# > python3 init.py llvm release
+# > init.py llvm release
 #   specify `llvm` toolchain and build in release mode
-# > python3 init.py gcc
+# > init.py gcc
 #   specify `gcc` toolchain and build in debug mode (default)
-# > python3 init.py gcc release
+# > init.py gcc release
 #   specify `gcc` toolchain and build in release mode
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument("toolchain", type=str)

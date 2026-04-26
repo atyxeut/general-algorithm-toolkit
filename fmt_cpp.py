@@ -18,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-# > python3 fmt_cpp.py path
+# > fmt_cpp.py path
 #                       ↑ this is required
 #   1. if path is a folder, recursively format every subpath in it
 #   2. if path is a .hpp/.cppm/.cpp/ file, format it using clang-format, styles are defined in .clang-format
